@@ -2,7 +2,6 @@
 
 import { encodedRedirect } from "@/utils/utils";
 import { createClient } from "@/utils/supabase/server";
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 export const signInAction = async (formData: FormData) => {
@@ -24,6 +23,10 @@ export const signInAction = async (formData: FormData) => {
 
 export const signOutAction = async () => {
   const supabase = await createClient();
-  await supabase.auth.signOut();
+  const { error } = await supabase.auth.signOut();
+  
+  if (error) {
+    console.error("Error signing out", error);
+  }
   return redirect("/sign-in");
 };

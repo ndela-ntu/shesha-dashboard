@@ -1,12 +1,14 @@
 import { signInAction } from "@/app/actions";
+import { FormMessage, Message } from "@/components/form-message";
 import SubmitButton from "@/components/submit-button";
+import { use } from "react";
 
-export default async function Login({
-  searchParams,
-}: {
-  searchParams: { error : string };
-}) {
-  const { error } = await searchParams;
+type PageProps = {
+  searchParams: Promise<Message>;
+};
+
+export default function Login({ searchParams }: PageProps) {
+  const message = use(searchParams);
 
   return (
     <form
@@ -35,8 +37,9 @@ export default async function Login({
             required
           />
         </div>
+
         <SubmitButton className="">Sign in</SubmitButton>
-        <div className="text-red-500 border-l-2 px-4">{error}</div>
+        <FormMessage message={message} />
       </div>
     </form>
   );
