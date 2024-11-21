@@ -19,6 +19,11 @@ const config = {
     },
     extend: {
       colors: {
+        celadon: "#74D3AE",
+        asparagus: "#678D58",
+        olivine: "#A6C48A",
+        champagne: "#F6E7CB",
+        coralPink: "#DD9787",
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

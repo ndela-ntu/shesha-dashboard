@@ -1,23 +1,37 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { type ComponentProps } from "react";
+import { VariantProps } from "class-variance-authority";
+import { Loader2 } from "lucide-react";
+import React, { ReactNode } from "react";
 import { useFormStatus } from "react-dom";
 
-type Props = ComponentProps<typeof Button> & {
-  pendingText?: string;
-};
+interface ButtonProps {
+  children: ReactNode; // Content of the button
+  onClick?: () => void; // Click handler
+  className?: string; // Custom className for styling
+  disabled?: boolean; // Disable the button
+}
 
-export function SubmitButton({
+export default function SubmitButton({
   children,
-  pendingText = "Submitting...",
-  ...props
-}: Props) {
+  onClick,
+  className = "",
+  disabled = false,
+}: ButtonProps) {
   const { pending } = useFormStatus();
 
   return (
-    <Button type="submit" aria-disabled={pending} {...props}>
-      {pending ? pendingText : children}
-    </Button>
+    <button
+      type="submit"
+      onClick={onClick}
+      disabled={pending}
+      className={`flex items-center justify-center bg-coralPink text-champagne px-2 py-1`}
+    >
+      {pending ? (
+        <Loader2 className="h-7 w-7 animate-spin" />
+      ) : (
+        <span>{children}</span>
+      )}
+    </button>
   );
 }
