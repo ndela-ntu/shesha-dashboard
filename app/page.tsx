@@ -6,7 +6,7 @@ export default async function Index() {
   return (
     <>
       <main className="flex flex-col h-screen items-center justify-center">
-        <h1 className="text-2xl my-5 text-center">Welcome to the SHESHA admin portal.</h1>
+        <h1 className="text-2xl my-5 text-center">Welcome to the <span className="font-black italic display-block">SHESHA</span> admin portal.</h1>
         <Link
           className="flex px-2.5 py-1 items-center space-x-2.5 bg-coralPink rounded-xl"
           href="/dashboard"

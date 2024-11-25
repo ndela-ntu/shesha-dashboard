@@ -9,7 +9,7 @@ const defaultUrl = process.env.VERCEL_URL
 
 export const metadata = {
   metadataBase: new URL(defaultUrl),
-  title: "SHESHA ADMIN",
+  title: "SHESHA Admin",
   description: "Shesha admin portal",
 };
 
@@ -27,7 +27,7 @@ export default function RootLayout({
     <html lang="en" className={`${montserrat.className}`} suppressHydrationWarning>
       <body className="bg-gradient-to-br from-asparagus to-olivine text-champagne">
         <ErrorBoundary>
-          <main className="min-h-screen">{children}</main>
+          <main className="h-full">{children}</main>
         </ErrorBoundary>
       </body>
     </html>

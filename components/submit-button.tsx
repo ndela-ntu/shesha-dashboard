@@ -25,7 +25,7 @@ export default function SubmitButton({
       type="submit"
       onClick={onClick}
       disabled={pending}
-      className={`flex items-center justify-center bg-coralPink text-champagne px-2 py-1`}
+      className={`z-20 flex items-center justify-center bg-coralPink text-champagne px-2 py-1`}
     >
       {pending ? (
         <Loader2 className="h-7 w-7 animate-spin" />
