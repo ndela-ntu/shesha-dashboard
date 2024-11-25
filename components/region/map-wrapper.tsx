@@ -11,6 +11,7 @@ export interface MapProps {
   allowMultipleMarkers?: boolean;
   regions: IRegion[];
   flyTo?: [number?, number?];
+  disableLocationSelect?: boolean;
 }
 
 // Dynamically import Leaflet to prevent SSR issues

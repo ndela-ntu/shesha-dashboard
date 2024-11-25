@@ -16,6 +16,7 @@ export const LeafletMap: React.FC<MapProps> = ({
   allowMultipleMarkers = false,
   regions,
   flyTo,
+  disableLocationSelect = false,
 }) => {
   const mapRef = useRef<HTMLDivElement | null>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
@@ -129,7 +130,9 @@ export const LeafletMap: React.FC<MapProps> = ({
       }).addTo(mapInstanceRef.current);
 
       // Add click handler
+      if (!disableLocationSelect) {
       mapInstanceRef.current.on("click", handleMapClick);
+      }
     }
 
     // Update view if center or zoom changes
