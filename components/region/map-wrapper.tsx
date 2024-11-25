@@ -12,6 +12,7 @@ export interface MapProps {
   regions: IRegion[];
   flyTo?: [number?, number?];
   disableLocationSelect?: boolean;
+  regionInQuestion?: IRegion;
 }
 
 // Dynamically import Leaflet to prevent SSR issues

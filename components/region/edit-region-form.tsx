@@ -4,16 +4,26 @@ import IRegion from "@/models/region";
 import SubmitButton from "../submit-button";
 import MapWrapper from "./map-wrapper";
 import { useActionState, useState } from "react";
-import { State, saveRegion } from "@/app/actions/region/region-actions";
+import {
+  State,
+  editRegion,
+  saveRegion,
+} from "@/app/actions/region/region-actions";
 import { useFormState } from "react-dom";
 
-export default function CreateRegionForm({ regions }: { regions: IRegion[] }) {
+export default function EditRegionForm({
+  regionToEdit,
+  regions,
+}: {
+  regionToEdit: IRegion;
+  regions: IRegion[];
+}) {
   const [coordinates, setCoordinates] = useState<[number, number] | undefined>(
     undefined
   );
   const initialState = { message: null, errors: {} };
   const [state, formAction] = useActionState<State, FormData>(
-    saveRegion,
+    editRegion,
     initialState
   );
 
@@ -23,11 +33,16 @@ export default function CreateRegionForm({ regions }: { regions: IRegion[] }) {
         if (coordinates) {
           formData.append("latitude", coordinates[0].toString());
           formData.append("longitude", coordinates[1].toString());
+        } else {
+          formData.append("latitude", regionToEdit.coordinates.lat.toString());
+          formData.append("longitude", regionToEdit.coordinates.lng.toString());
         }
         formAction(formData);
       }}
       className="w-full flex flex-col space-y-2.5"
     >
+      <input type="hidden" name="regionId" value={regionToEdit.id} />
+      <input type="hidden" name="coordinateId" value={regionToEdit.id} />
       <div>
         <label htmlFor="name" className="text-champagne">
           Region name
@@ -35,6 +50,7 @@ export default function CreateRegionForm({ regions }: { regions: IRegion[] }) {
         <input
           name="name"
           type="text"
+          defaultValue={regionToEdit.name}
           className="input input-bordered input-sm w-full border border-champagne bg-transparent placeholder-champagne text-champagne"
           placeholder="Enter region name"
         />
@@ -48,15 +64,23 @@ export default function CreateRegionForm({ regions }: { regions: IRegion[] }) {
         </div>
       </div>
       <div>
-        <div className="flex space-x-2.5 items-center">
-          <span>Pick Region - </span>
-          <div className="h-5 w-5 rounded-full bg-orange-500 border border-orange-700"></div>
+        <div>
+          <div className="flex space-x-2.5 items-center">
+            <span>Pick Region - </span>
+            <div className="h-5 w-5 rounded-full bg-orange-500 border border-orange-700"></div>
+          </div>
+          <div className="flex space-x-2.5 items-center">
+            <span>Current Region - </span>
+            <div className="h-5 w-5 rounded-full bg-gray-500 border border-gray-700"></div>
+          </div>
         </div>
         <MapWrapper
           onLocationSelect={(coordinates) => {
             setCoordinates(coordinates);
           }}
-          regions={regions}
+          center={[regionToEdit.coordinates.lat, regionToEdit.coordinates.lng]}
+          regions={regions.filter((region) => region.id !== regionToEdit.id)}
+          regionInQuestion={regionToEdit}
         />
         <div id="name-error" aria-live="polite" aria-atomic="true">
           {state.errors?.latitude &&

@@ -8,8 +8,6 @@ export default async function Page() {
     .from("regions")
     .select(`*, coordinates (lat, lng)`);
 
-  console.log(regions);
-
   if (error) {
     return <div>{`An error occurred: ${error.message}`}</div>;
   }

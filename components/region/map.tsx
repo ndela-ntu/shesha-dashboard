@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useCallback } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { MapProps } from "./map-wrapper";
+import IRegion from "@/models/region";
 
 // Default values
 const DEFAULT_CENTER: [number, number] = [-26.295647, 27.922997];
@@ -17,6 +18,7 @@ export const LeafletMap: React.FC<MapProps> = ({
   regions,
   flyTo,
   disableLocationSelect = false,
+  regionInQuestion,
 }) => {
   const mapRef = useRef<HTMLDivElement | null>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
@@ -73,6 +75,12 @@ export const LeafletMap: React.FC<MapProps> = ({
     [allowMultipleMarkers, onLocationSelect]
   );
 
+  useEffect(() => {
+    if (mapInstanceRef.current) {
+      mapInstanceRef.current.setView(center, zoom);
+    }
+  }, []);
+
   // Setup map
   useEffect(() => {
     // Ensure we're in a browser environment
@@ -100,7 +108,7 @@ export const LeafletMap: React.FC<MapProps> = ({
           flyTo?.[1] ?? center[1]
         );
 
-        mapInstanceRef.current?.flyTo(L.latLng(latlng), 10);
+        //mapInstanceRef.current?.flyTo(L.latLng(latlng), 10);
 
         // Create and add new marker
         const marker = L.marker(latlng).addTo(mapInstanceRef.current!);
@@ -123,6 +131,19 @@ export const LeafletMap: React.FC<MapProps> = ({
         }).addTo(mapInstanceRef.current!);
       });
 
+      if (regionInQuestion) {
+        L.circle(
+          [regionInQuestion.coordinates.lat, regionInQuestion.coordinates.lng],
+          {
+            color: "gray",
+            fillColor: "gray",
+            fillOpacity: 0.5,
+            radius: 2000,
+            attribution: "Region to Edit",
+          }
+        ).addTo(mapInstanceRef.current!);
+      }
+
       // Add tile layer
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         attribution:
@@ -131,14 +152,11 @@ export const LeafletMap: React.FC<MapProps> = ({
 
       // Add click handler
       if (!disableLocationSelect) {
-      mapInstanceRef.current.on("click", handleMapClick);
+        mapInstanceRef.current.on("click", handleMapClick);
       }
     }
 
     // Update view if center or zoom changes
-    if (mapInstanceRef.current) {
-      mapInstanceRef.current.setView(center, zoom);
-    }
 
     // Cleanup function
     return () => {
@@ -149,12 +167,12 @@ export const LeafletMap: React.FC<MapProps> = ({
         mapInstanceRef.current = null;
       }
     };
-  }, [center, zoom, flyTo]); // Remove handleMapClick from dependencies to prevent rerender
+  }, [zoom, flyTo]); // Remove handleMapClick from dependencies to prevent rerender
 
   return (
     <div
       ref={mapRef}
-      className="h-96 w-full z-10"
+      className="h-96 w-full z-0"
       aria-label="Interactive Map"
     />
   );

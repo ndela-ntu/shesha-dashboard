@@ -23,7 +23,7 @@ export default function RegionListItem({ region }: { region: IRegion }) {
           >
             <Eye />
           </button>
-          <Link href="/dashboard/regions/edit">
+          <Link href={`/dashboard/regions/edit/${region.id}`}>
             <Pencil />
           </Link>
           <button>
