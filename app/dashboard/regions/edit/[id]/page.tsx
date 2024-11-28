@@ -4,7 +4,7 @@ import IRegion from "@/models/region";
 import { createClient } from "@/utils/supabase/server";
 import { notFound } from "next/navigation";
 
-export default async function Page({ params }: { params: { id: number } }) {
+export default async function Page({ params }: { params: Promise<{id: string}> }) {
   const resolvedParams = await params;
   const id = resolvedParams.id;
 

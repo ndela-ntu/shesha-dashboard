@@ -2,10 +2,9 @@
 
 import IRegion from "@/models/region";
 import SubmitButton from "../submit-button";
-import MapWrapper from "./map-wrapper";
 import { useActionState, useState } from "react";
 import { State, saveRegion } from "@/app/actions/region/region-actions";
-import { useFormState } from "react-dom";
+import MapWrapper from "../map-wrapper";
 
 export default function CreateRegionForm({ regions }: { regions: IRegion[] }) {
   const [coordinates, setCoordinates] = useState<[number, number] | undefined>(

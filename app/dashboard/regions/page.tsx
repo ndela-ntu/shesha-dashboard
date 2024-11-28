@@ -31,14 +31,12 @@ export default async function Page() {
       </div>
       <Divider />
       <ul className="w-full">
-        {regions.map((region) => {
-          return (
-            <div>
-              <RegionListItem key={region.id} region={region} />
-              <Divider />
-            </div>
-          );
-        })}
+        {regions.map((region) => (
+          <div key={region.id}>
+            <RegionListItem region={region} />
+            <Divider />
+          </div>
+        ))}
       </ul>
     </div>
   );

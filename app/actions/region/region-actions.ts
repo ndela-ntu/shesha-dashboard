@@ -2,6 +2,7 @@
 
 import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
+import { fetchExternalImage } from "next/dist/server/image-optimizer";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
@@ -129,4 +130,42 @@ export async function editRegion(prevState: State, formData: FormData) {
 
   revalidatePath("/dashboard/regions");
   redirect("/dashboard/regions");
+}
+
+export async function deleteRegion(id: number) {
+  try {
+    const { data: region, error: fetchRegionError } = await (await supabase)
+      .from("regions")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (fetchRegionError) {
+      throw new Error(`Failed to fetch region: ${fetchRegionError.message}`);
+    }
+
+    const { error: deleteRegionError } = await (await supabase)
+      .from("regions")
+      .delete()
+      .eq("id", id);
+
+    if (deleteRegionError) {
+      throw new Error(`Failed to delete region: ${deleteRegionError.message}`);
+    }
+
+    const { error: deleteCoordError } = await (await supabase)
+      .from("coordinates")
+      .delete()
+      .eq("id", region.coordinates);
+
+    if (deleteCoordError) {
+      throw new Error(
+        `Failed to delete coordinates: ${deleteCoordError.message}`
+      );
+    }
+  } catch (error) {
+    console.error("Error in deleteRegion:", error);
+  }
+
+  revalidatePath("/dashboard/regions");
 }
