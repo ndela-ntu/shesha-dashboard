@@ -8,14 +8,19 @@ import { ImageDown } from "lucide-react";
 
 export default function CreateStoreForm({ regions }: { regions: IRegion[] }) {
   const [logoState, setLogoState] = useState<"Upload" | "Default" | null>(null);
+  const [locationState, setLocationState] = useState<
+    "CurrentLocation" | "ChooseFromMap"
+  >("CurrentLocation");
   const [gradientStyle, setGradientStyle] = useState<{ background: string }>({
     background: "",
   });
+  const [defaultLogo, setDefaultLogo] = useState<[string, string] | null>(null);
   const [name, setName] = useState("");
   const [selectedRegion, setSelectedRegion] = useState("0");
 
   const handleOnSwitchClick = () => {
     const colors = generateRandomColors();
+    setDefaultLogo(colors);
     const gradientStyle = {
       background: `linear-gradient(135deg, ${colors[0]}, ${colors[1]})`,
     };
@@ -30,19 +35,6 @@ export default function CreateStoreForm({ regions }: { regions: IRegion[] }) {
       }}
       className="w-full flex flex-col space-y-2.5"
     >
-      <div>
-        <label htmlFor="name" className="text-champagne">
-          Store name
-        </label>
-        <input
-          name="name"
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="input input-bordered input-sm w-full border border-champagne bg-transparent placeholder-champagne text-champagne"
-          placeholder="Enter store name"
-        />
-      </div>
       <div>
         <label>Logo</label>
         <div className="flex">
@@ -84,6 +76,29 @@ export default function CreateStoreForm({ regions }: { regions: IRegion[] }) {
         )}
       </div>
       <div>
+        <label htmlFor="name" className="text-champagne">
+          Store name
+        </label>
+        <input
+          name="name"
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          className="input input-bordered input-sm w-full border border-champagne bg-transparent placeholder-champagne text-champagne"
+          placeholder="Enter store name"
+        />
+      </div>
+      <div>
+        <label htmlFor="description" className="text-champagne">
+          Description
+        </label>
+        <textarea
+          name="description"
+          className="textarea textarea-bordered w-full border border-champagne bg-transparent placeholder-champagne text-champagne"
+          placeholder="Description"
+        ></textarea>
+      </div>
+      <div>
         <label htmlFor="region" className="text-champagne">
           Region
         </label>
@@ -91,7 +106,7 @@ export default function CreateStoreForm({ regions }: { regions: IRegion[] }) {
           name="region"
           value={selectedRegion}
           onChange={(e) => setSelectedRegion(e.target.value)}
-          className="select select-bordered w-full bg-champagne text-asparagus"
+          className="select select-bordered select-sm w-full bg-champagne text-asparagus"
         >
           <option value="0" disabled>
             Select region
@@ -102,6 +117,27 @@ export default function CreateStoreForm({ regions }: { regions: IRegion[] }) {
             </option>
           ))}
         </select>
+      </div>
+      <div>
+        <label htmlFor="location" className="text-champagne">
+          Location
+        </label>
+        <div className="flex">
+          <Button
+            onClick={() => {
+              setLocationState("CurrentLocation");
+            }}
+          >
+            Use Current Location
+          </Button>
+          <Button
+            onClick={() => {
+              setLocationState("ChooseFromMap");
+            }}
+          >
+            Choose From Map
+          </Button>
+        </div>
       </div>
     </form>
   );
