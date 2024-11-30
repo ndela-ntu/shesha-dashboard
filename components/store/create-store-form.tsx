@@ -52,7 +52,7 @@ export default function CreateStoreForm({ regions }: { regions: IRegion[] }) {
   };
 
   return (
-    <>
+    <div className="pb-6">
       <form
         action={(formData) => {
           console.log(formData.get("region"));
@@ -143,9 +143,14 @@ export default function CreateStoreForm({ regions }: { regions: IRegion[] }) {
           </select>
         </div>
         <div>
-          <label htmlFor="location" className="text-champagne">
+          <label
+            htmlFor="location"
+            className="text-champagne flex justify-between"
+          >
             <span>Location</span>
-            <span>{`[${location?.latitude}, ${location?.longitude}]`}</span>
+            {location && (
+              <span>{`[${location?.latitude}, ${location?.longitude}]`}</span>
+            )}
           </label>
           <div className="flex w-full space-x-1">
             <Button
@@ -177,14 +182,25 @@ export default function CreateStoreForm({ regions }: { regions: IRegion[] }) {
       <dialog id="pick_location" className="modal ">
         <div className="modal-box bg-coralPink text-champagne">
           <h3 className="font-bold text-lg">Pick Location</h3>
-          <div>
-            <MapWrapper isRegionSelect={false} regions={regions} />
+          <div className="w-full">
+            <MapWrapper
+              onLocationSelect={(coordinates) => {
+                setLocation({
+                  latitude: Number(coordinates[0].toFixed(7)),
+                  longitude: Number(coordinates[1].toFixed(7)),
+                });
+              }}
+              isRegionSelect={false}
+              regions={regions}
+            />
+          </div>
+          <div className="modal-action flex items-center justify-center w-full">
+            <form method="dialog">
+              <button className="btn rounded-xl bg-champagne text-asparagus px-2.5 py-1 my-1">Close</button>
+            </form>
           </div>
         </div>
-        <form method="dialog" className="modal-backdrop">
-          <button>close</button>
-        </form>
       </dialog>
-    </>
+    </div>
   );
 }
