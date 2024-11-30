@@ -19,6 +19,7 @@ export const LeafletMap: React.FC<MapProps> = ({
   flyTo,
   disableLocationSelect = false,
   regionInQuestion,
+  isRegionSelect = true,
 }) => {
   const mapRef = useRef<HTMLDivElement | null>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
@@ -44,12 +45,16 @@ export const LeafletMap: React.FC<MapProps> = ({
 
       // Create and add new marker
       const marker = L.marker(coordinates).addTo(mapInstanceRef.current!);
-      const circle = L.circle(coordinates, {
-        color: "orange",
-        fillColor: "orange",
-        fillOpacity: 0.5,
-        radius: 2000,
-      }).addTo(mapInstanceRef.current!);
+      if (isRegionSelect) {
+        const circle = L.circle(coordinates, {
+          color: "orange",
+          fillColor: "orange",
+          fillOpacity: 0.5,
+          radius: 2000,
+        }).addTo(mapInstanceRef.current!);
+
+        circlesRef.current.push(circle);
+      }
 
       // Add popup with coordinates
       marker
@@ -65,7 +70,6 @@ export const LeafletMap: React.FC<MapProps> = ({
 
       // Store marker reference
       markersRef.current.push(marker);
-      circlesRef.current.push(circle);
 
       // Call the callback with the coordinates
       if (onLocationSelect) {
@@ -122,7 +126,7 @@ export const LeafletMap: React.FC<MapProps> = ({
           .openPopup();
       }
 
-      regions.forEach((region) => {
+      regions?.forEach((region) => {
         L.circle([region.coordinates.lat, region.coordinates.lng], {
           color: "skyblue",
           fillColor: "skyblue",

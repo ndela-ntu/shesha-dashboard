@@ -9,10 +9,11 @@ export interface MapProps {
   zoom?: number;
   onLocationSelect?: (coordinates: [number, number]) => void;
   allowMultipleMarkers?: boolean;
-  regions: IRegion[];
+  regions?: IRegion[];
   flyTo?: [number?, number?];
   disableLocationSelect?: boolean;
   regionInQuestion?: IRegion;
+  isRegionSelect?: boolean;
 }
 
 // Dynamically import Leaflet to prevent SSR issues

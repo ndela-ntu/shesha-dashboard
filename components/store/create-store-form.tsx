@@ -5,18 +5,24 @@ import Button from "../button";
 import { useEffect, useState } from "react";
 import generateRandomColors from "@/utils/generate-random-colors";
 import { ImageDown } from "lucide-react";
+import fetchCurrentLocation from "@/utils/fetch-current-location";
+import MapWrapper from "../map-wrapper";
 
 export default function CreateStoreForm({ regions }: { regions: IRegion[] }) {
   const [logoState, setLogoState] = useState<"Upload" | "Default" | null>(null);
-  const [locationState, setLocationState] = useState<
-    "CurrentLocation" | "ChooseFromMap"
-  >("CurrentLocation");
   const [gradientStyle, setGradientStyle] = useState<{ background: string }>({
     background: "",
   });
   const [defaultLogo, setDefaultLogo] = useState<[string, string] | null>(null);
   const [name, setName] = useState("");
   const [selectedRegion, setSelectedRegion] = useState("0");
+  const [location, setLocation] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
+  const [currLocationError, setCurrLocationError] = useState<string | null>(
+    null
+  );
 
   const handleOnSwitchClick = () => {
     const colors = generateRandomColors();
@@ -28,117 +34,157 @@ export default function CreateStoreForm({ regions }: { regions: IRegion[] }) {
     setGradientStyle(gradientStyle);
   };
 
+  const handleOnCurrentLocationClick = async () => {
+    const { location, error } = await fetchCurrentLocation();
+
+    if (error) {
+      setCurrLocationError(error);
+      (
+        document.getElementById("location_error") as HTMLDialogElement
+      ).showModal();
+    } else {
+      setLocation(location);
+    }
+  };
+
+  const handleOnFromMapClick = () => {
+    (document.getElementById("pick_location") as HTMLDialogElement).showModal();
+  };
+
   return (
-    <form
-      action={(formData) => {
-        console.log(formData.get("region"));
-      }}
-      className="w-full flex flex-col space-y-2.5"
-    >
-      <div>
-        <label>Logo</label>
-        <div className="flex">
-          <Button
-            onClick={() => {
-              setLogoState("Upload");
-            }}
-          >
-            Upload Logo
-          </Button>
-          <Button
-            onClick={() => {
-              handleOnSwitchClick();
-              setLogoState("Default");
-            }}
-          >
-            Use Default Avatar
-          </Button>
-        </div>
-        {logoState === "Default" ? (
-          <div
-            style={{ ...gradientStyle }}
-            className={`m-2.5 border border-champagne aspect-square h-64 w-64 rounded-full flex items-center justify-center`}
-          >
-            <button
-              className="bg-coralPink text-asparagus px-2.5 py-1 rounded-xl"
-              onClick={(e) => {
-                e.preventDefault();
-                handleOnSwitchClick();
+    <>
+      <form
+        action={(formData) => {
+          console.log(formData.get("region"));
+        }}
+        className="w-full flex flex-col space-y-2.5"
+      >
+        <div>
+          <label>Logo</label>
+          <div className="flex w-full space-x-1">
+            <Button
+              onClick={() => {
+                setLogoState("Upload");
               }}
             >
-              Switch
-            </button>
+              Upload Logo
+            </Button>
+            <Button
+              onClick={() => {
+                handleOnSwitchClick();
+                setLogoState("Default");
+              }}
+            >
+              Use Default Avatar
+            </Button>
           </div>
-        ) : (
-          <div className="m-2.5 border border-champagne aspect-square h-64 w-64 flex items-center justify-center">
-            <ImageDown />
-          </div>
-        )}
-      </div>
-      <div>
-        <label htmlFor="name" className="text-champagne">
-          Store name
-        </label>
-        <input
-          name="name"
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="input input-bordered input-sm w-full border border-champagne bg-transparent placeholder-champagne text-champagne"
-          placeholder="Enter store name"
-        />
-      </div>
-      <div>
-        <label htmlFor="description" className="text-champagne">
-          Description
-        </label>
-        <textarea
-          name="description"
-          className="textarea textarea-bordered w-full border border-champagne bg-transparent placeholder-champagne text-champagne"
-          placeholder="Description"
-        ></textarea>
-      </div>
-      <div>
-        <label htmlFor="region" className="text-champagne">
-          Region
-        </label>
-        <select
-          name="region"
-          value={selectedRegion}
-          onChange={(e) => setSelectedRegion(e.target.value)}
-          className="select select-bordered select-sm w-full bg-champagne text-asparagus"
-        >
-          <option value="0" disabled>
-            Select region
-          </option>
-          {regions.map((region) => (
-            <option key={region.id} value={region.id}>
-              {region.name}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div>
-        <label htmlFor="location" className="text-champagne">
-          Location
-        </label>
-        <div className="flex">
-          <Button
-            onClick={() => {
-              setLocationState("CurrentLocation");
-            }}
-          >
-            Use Current Location
-          </Button>
-          <Button
-            onClick={() => {
-              setLocationState("ChooseFromMap");
-            }}
-          >
-            Choose From Map
-          </Button>
+          {logoState === "Default" ? (
+            <div
+              style={{ ...gradientStyle }}
+              className={`m-2.5 border border-champagne aspect-square h-64 w-64 rounded-full flex items-center justify-center`}
+            >
+              <button
+                className="bg-coralPink text-asparagus px-2.5 py-1 rounded-xl"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleOnSwitchClick();
+                }}
+              >
+                Switch
+              </button>
+            </div>
+          ) : (
+            <div className="m-2.5 border border-champagne aspect-square h-64 w-64 flex items-center justify-center">
+              <ImageDown />
+            </div>
+          )}
         </div>
-      </div>
-    </form>
+        <div>
+          <label htmlFor="name" className="text-champagne">
+            Store name
+          </label>
+          <input
+            name="name"
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="input input-bordered input-sm w-full border border-champagne bg-transparent placeholder-champagne text-champagne"
+            placeholder="Enter store name"
+          />
+        </div>
+        <div>
+          <label htmlFor="description" className="text-champagne">
+            Description
+          </label>
+          <textarea
+            name="description"
+            className="textarea textarea-bordered w-full border border-champagne bg-transparent placeholder-champagne text-champagne"
+            placeholder="Description"
+          ></textarea>
+        </div>
+        <div>
+          <label htmlFor="region" className="text-champagne">
+            Region
+          </label>
+          <select
+            name="region"
+            value={selectedRegion}
+            onChange={(e) => setSelectedRegion(e.target.value)}
+            className="select select-bordered select-sm w-full bg-champagne text-asparagus"
+          >
+            <option value="0" disabled>
+              Select region
+            </option>
+            {regions.map((region) => (
+              <option key={region.id} value={region.id}>
+                {region.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label htmlFor="location" className="text-champagne">
+            <span>Location</span>
+            <span>{`[${location?.latitude}, ${location?.longitude}]`}</span>
+          </label>
+          <div className="flex w-full space-x-1">
+            <Button
+              onClick={() => {
+                handleOnCurrentLocationClick();
+              }}
+            >
+              Use Current Location
+            </Button>
+            <Button
+              onClick={() => {
+                handleOnFromMapClick();
+              }}
+            >
+              Choose From Map
+            </Button>
+          </div>
+        </div>
+      </form>
+      <dialog id="location_error" className="modal">
+        <div className="modal-box bg-coralPink text-champagne">
+          <h3 className="font-bold text-lg">Error Using Location</h3>
+          <p className="py-4">{currLocationError}</p>
+        </div>
+        <form method="dialog" className="modal-backdrop">
+          <button>close</button>
+        </form>
+      </dialog>
+      <dialog id="pick_location" className="modal ">
+        <div className="modal-box bg-coralPink text-champagne">
+          <h3 className="font-bold text-lg">Pick Location</h3>
+          <div>
+            <MapWrapper isRegionSelect={false} regions={regions} />
+          </div>
+        </div>
+        <form method="dialog" className="modal-backdrop">
+          <button>close</button>
+        </form>
+      </dialog>
+    </>
   );
 }
