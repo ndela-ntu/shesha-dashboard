@@ -7,8 +7,9 @@ import generateRandomColors from "@/utils/generate-random-colors";
 import { ImageDown } from "lucide-react";
 import fetchCurrentLocation from "@/utils/fetch-current-location";
 import MapWrapper from "../map-wrapper";
-import MenuManager from "./menu-manager";
 import IMenu_item from "@/models/menu_item";
+import MenuItemManager from "./menu-item-manager";
+import Divider from "../divider";
 
 export default function CreateStoreForm({ regions }: { regions: IRegion[] }) {
   const [logoState, setLogoState] = useState<"Upload" | "Default" | null>(null);
@@ -176,34 +177,21 @@ export default function CreateStoreForm({ regions }: { regions: IRegion[] }) {
             </Button>
           </div>
         </div>
+        <Divider />
         <div>
-          <label>Menu</label>
-          <div>
-            <label>Name</label>
+          <h2 className="text-xl font-bold">Menu Item Manager</h2>
+          <div className="py-2.5">
+            <label>Menu Name</label>
             <input
               name="menuName"
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="input input-bordered input-sm w-full border border-champagne bg-transparent placeholder-champagne text-champagne"
-              placeholder="Enter store name"
+              placeholder="Name of menu"
             />
           </div>
-          <div>
-            <MenuManager onSubmit={handleMenuSubmit} />
-            <div className="mt-8">
-              <h2 className="text-xl font-semibold mb-4">Menu Items</h2>
-              <ul className="space-y-4">
-                {menuItems.map((item) => (
-                  <li key={item.id} className="border p-4 rounded shadow">
-                    <h3 className="font-bold">{item.category}</h3>
-                    <p>Price: R{item.price}</p>
-                    <p>Ingredients: {item.ingredients.join(", ")}</p>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
+          <MenuItemManager />
         </div>
       </form>
       <dialog id="location_error" className="modal">

@@ -1,10 +1,10 @@
 export enum ITEMSCATEGORY {
-  KOTA = "KOTA",
-  CHICKEN_DUST = "CHICKEN_DUST",
-  INHLOKO = "INHLOKO",
-  MOGUDO = "MOGUDO",
-  FATCAKES = "FATCAKES",
-  DAGWOOD = "DAGWOOD",
-  SCONES = "SCONES",
-  MUFFINS = "MUFFINS",
+  KOTA = "Kota",
+  CHICKEN_DUST = "Chicken Dust",
+  INHLOKO = "Inhloko",
+  MOGUDO = "Mogudo",
+  FATCAKES = "Fatcakes",
+  DAGWOOD = "Dagwood",
+  SCONES = "Scones",
+  MUFFINS = "Muffins",
 }
