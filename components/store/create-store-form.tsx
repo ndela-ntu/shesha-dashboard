@@ -7,6 +7,8 @@ import generateRandomColors from "@/utils/generate-random-colors";
 import { ImageDown } from "lucide-react";
 import fetchCurrentLocation from "@/utils/fetch-current-location";
 import MapWrapper from "../map-wrapper";
+import MenuManager from "./menu-manager";
+import IMenu_item from "@/models/menu_item";
 
 export default function CreateStoreForm({ regions }: { regions: IRegion[] }) {
   const [logoState, setLogoState] = useState<"Upload" | "Default" | null>(null);
@@ -23,6 +25,11 @@ export default function CreateStoreForm({ regions }: { regions: IRegion[] }) {
   const [currLocationError, setCurrLocationError] = useState<string | null>(
     null
   );
+  const [menuItems, setMenuItems] = useState<IMenu_item[]>([]);
+
+  const handleMenuSubmit = (menuItem: IMenu_item) => {
+    setMenuItems((prev) => [...prev, menuItem]);
+  };
 
   const handleOnSwitchClick = () => {
     const colors = generateRandomColors();
@@ -169,6 +176,35 @@ export default function CreateStoreForm({ regions }: { regions: IRegion[] }) {
             </Button>
           </div>
         </div>
+        <div>
+          <label>Menu</label>
+          <div>
+            <label>Name</label>
+            <input
+              name="menuName"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="input input-bordered input-sm w-full border border-champagne bg-transparent placeholder-champagne text-champagne"
+              placeholder="Enter store name"
+            />
+          </div>
+          <div>
+            <MenuManager onSubmit={handleMenuSubmit} />
+            <div className="mt-8">
+              <h2 className="text-xl font-semibold mb-4">Menu Items</h2>
+              <ul className="space-y-4">
+                {menuItems.map((item) => (
+                  <li key={item.id} className="border p-4 rounded shadow">
+                    <h3 className="font-bold">{item.category}</h3>
+                    <p>Price: R{item.price}</p>
+                    <p>Ingredients: {item.ingredients.join(", ")}</p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
       </form>
       <dialog id="location_error" className="modal">
         <div className="modal-box bg-coralPink text-champagne">
@@ -196,7 +232,9 @@ export default function CreateStoreForm({ regions }: { regions: IRegion[] }) {
           </div>
           <div className="modal-action flex items-center justify-center w-full">
             <form method="dialog">
-              <button className="btn rounded-xl bg-champagne text-asparagus px-2.5 py-1 my-1">Close</button>
+              <button className="btn rounded-xl bg-champagne text-asparagus px-2.5 py-1 my-1">
+                Close
+              </button>
             </form>
           </div>
         </div>

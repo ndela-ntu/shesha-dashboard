@@ -5,7 +5,7 @@ import IRegion from "./region";
 export default interface IStore {
     id: number;
     name: string;
-    logoUrl: string;
+    logoUrl?: string;
     defaultLogo: { from: string, to:string};
     description: string;
     coordinates: ICoordinate;
