@@ -3,9 +3,8 @@
 import { ITEMSCATEGORY } from "@/models/item_category";
 import IMenu_item from "@/models/menu_item";
 import Button from "../button";
-import React, { useState } from 'react';
-import { PlusCircle, Trash2 } from 'lucide-react';
-
+import React, { useState } from "react";
+import { PlusCircle, Trash2 } from "lucide-react";
 
 const MenuItemManager: React.FC = () => {
   const [menuItems, setMenuItems] = useState<IMenu_item[]>([]);
@@ -19,7 +18,9 @@ const MenuItemManager: React.FC = () => {
   const [ingredientInput, setIngredientInput] = useState<string>("");
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
   ) => {
     const { name, value } = e.target;
     setNewItem((prev) => ({
@@ -82,27 +83,22 @@ const MenuItemManager: React.FC = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg">
-      <h2 className="text-2xl font-bold mb-6">Menu Item Manager</h2>
-
-      {/* Add New Item Form */}
-      <div className="mb-6 p-4 border rounded-lg">
-        <h3 className="text-lg font-semibold mb-4">Add New Menu Item</h3>
-
-        <div className="grid grid-cols-2 gap-4">
+    <div className="">
+      <div className="flex flex-col space-y-2">
+        <div className="grid grid-cols-2 gap-2">
           <input
             type="text"
             name="name"
             value={newItem.name}
             onChange={handleInputChange}
             placeholder="Item Name"
-            className="border p-2 rounded"
+            className="input input-bordered input-sm w-full border border-champagne bg-transparent placeholder-champagne text-champagne"
           />
           <select
             name="category"
             value={newItem.category}
             onChange={handleInputChange}
-            className="border p-2 rounded"
+            className="select select-bordered select-sm w-full bg-champagne text-asparagus"
           >
             {Object.values(ITEMSCATEGORY).map((category) => (
               <option key={category} value={category}>
@@ -117,17 +113,17 @@ const MenuItemManager: React.FC = () => {
           value={newItem.description}
           onChange={(e) => handleInputChange(e)}
           placeholder="Item Description"
-          className="w-full border p-2 rounded mt-4"
+          className="textarea textarea-bordered w-full border border-champagne bg-transparent placeholder-champagne text-champagne"
         />
 
-        <div className="flex items-center mt-4">
+        <div className="flex items-center space-x-2.5">
           <input
             type="number"
             name="price"
             value={newItem.price}
             onChange={handleInputChange}
             placeholder="Price"
-            className="border p-2 rounded w-24 mr-4"
+            className="input input-bordered input-sm w-24 border border-champagne bg-transparent placeholder-champagne text-champagne"
           />
 
           <div className="flex items-center">
@@ -136,7 +132,7 @@ const MenuItemManager: React.FC = () => {
               value={ingredientInput}
               onChange={(e) => setIngredientInput(e.target.value)}
               placeholder="Add Ingredient"
-              className="border p-2 rounded mr-2"
+              className="input input-bordered input-sm w-full border border-champagne bg-transparent placeholder-champagne text-champagne"
             />
             <button
               onClick={addIngredient}
@@ -170,7 +166,7 @@ const MenuItemManager: React.FC = () => {
 
         <button
           onClick={addMenuItem}
-          className="mt-4 bg-blue-500 text-white p-2 rounded hover:bg-blue-600 flex items-center"
+          className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 flex items-center"
         >
           <PlusCircle size={20} className="mr-2" /> Add Menu Item
         </button>

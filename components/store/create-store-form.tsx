@@ -10,6 +10,16 @@ import MapWrapper from "../map-wrapper";
 import IMenu_item from "@/models/menu_item";
 import MenuItemManager from "./menu-item-manager";
 import Divider from "../divider";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 export default function CreateStoreForm({ regions }: { regions: IRegion[] }) {
   const [logoState, setLogoState] = useState<"Upload" | "Default" | null>(null);
@@ -53,10 +63,6 @@ export default function CreateStoreForm({ regions }: { regions: IRegion[] }) {
     } else {
       setLocation(location);
     }
-  };
-
-  const handleOnFromMapClick = () => {
-    (document.getElementById("pick_location") as HTMLDialogElement).showModal();
   };
 
   return (
@@ -168,13 +174,37 @@ export default function CreateStoreForm({ regions }: { regions: IRegion[] }) {
             >
               Use Current Location
             </Button>
-            <Button
-              onClick={() => {
-                handleOnFromMapClick();
-              }}
-            >
-              Choose From Map
-            </Button>
+            <Dialog>
+              <DialogTrigger>
+               <span className="bg-coralPink text-champagne p-2.5 rounded-xl">Choose From Map</span>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Pick Location From Map</DialogTitle>
+                  <DialogDescription>
+                    Pick the store location within a valid region, indicated by
+                    the blue circle on the map.
+                  </DialogDescription>
+                </DialogHeader>
+                <MapWrapper
+                  onLocationSelect={(coordinates) => {
+                    setLocation({
+                      latitude: Number(coordinates[0].toFixed(7)),
+                      longitude: Number(coordinates[1].toFixed(7)),
+                    });
+                  }}
+                  isRegionSelect={false}
+                  regions={regions}
+                />
+                <DialogFooter>
+                  <DialogClose asChild>
+                    <Button>
+                      Close
+                    </Button>
+                  </DialogClose>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
         <Divider className="my-4" />
@@ -191,30 +221,6 @@ export default function CreateStoreForm({ regions }: { regions: IRegion[] }) {
         <form method="dialog" className="modal-backdrop">
           <button>close</button>
         </form>
-      </dialog>
-      <dialog id="pick_location" className="modal ">
-        <div className="modal-box bg-coralPink text-champagne">
-          <h3 className="font-bold text-lg">Pick Location</h3>
-          <div className="w-full">
-            <MapWrapper
-              onLocationSelect={(coordinates) => {
-                setLocation({
-                  latitude: Number(coordinates[0].toFixed(7)),
-                  longitude: Number(coordinates[1].toFixed(7)),
-                });
-              }}
-              isRegionSelect={false}
-              regions={regions}
-            />
-          </div>
-          <div className="modal-action flex items-center justify-center w-full">
-            <form method="dialog">
-              <button className="btn rounded-xl bg-champagne text-asparagus px-2.5 py-1 my-1">
-                Close
-              </button>
-            </form>
-          </div>
-        </div>
       </dialog>
     </div>
   );
