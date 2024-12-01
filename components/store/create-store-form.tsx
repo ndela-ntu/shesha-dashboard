@@ -177,20 +177,9 @@ export default function CreateStoreForm({ regions }: { regions: IRegion[] }) {
             </Button>
           </div>
         </div>
-        <Divider />
+        <Divider className="my-4" />
         <div>
           <h2 className="text-xl font-bold">Menu Item Manager</h2>
-          <div className="py-2.5">
-            <label>Menu Name</label>
-            <input
-              name="menuName"
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="input input-bordered input-sm w-full border border-champagne bg-transparent placeholder-champagne text-champagne"
-              placeholder="Name of menu"
-            />
-          </div>
           <MenuItemManager />
         </div>
       </form>

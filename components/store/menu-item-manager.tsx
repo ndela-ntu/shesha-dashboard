@@ -65,37 +65,47 @@ const MenuItemManager: React.FC = () => {
     <div className="mx-auto">
       {/* Input Form */}
       <div className="flex flex-col space-y-2.5 mb-4">
-        <select
-          name="category"
-          value={newItem.category}
-          onChange={handleInputChange}
-          className="select select-bordered select-sm w-full bg-champagne text-asparagus"
-        >
-          {Object.values(ITEMSCATEGORY).map((category) => (
-            <option key={category} value={category}>
-              {category}
-            </option>
-          ))}
-        </select>
+        <div className="flex flex-col">
+          <label>Category</label>
+          <select
+            name="category"
+            value={newItem.category}
+            onChange={handleInputChange}
+            className="select select-bordered select-sm w-full bg-champagne text-asparagus"
+          >
+            {Object.values(ITEMSCATEGORY).map((category) => (
+              <option key={category} value={category}>
+                {category}
+              </option>
+            ))}
+          </select>
+        </div>
 
-        <input
-          type="number"
-          name="price"
-          value={newItem.price}
-          onChange={handleInputChange}
-          placeholder="Price"
-          className="input input-bordered input-sm w-full border border-champagne bg-transparent placeholder-champagne text-champagne"
-        />
-
-        {/* Ingredients Section */}
-        <div className="flex mb-2 space-x-2.5">
+        <div>
+          <label>Price</label>
           <input
-            type="text"
-            value={ingredientInput}
-            onChange={(e) => setIngredientInput(e.target.value)}
-            placeholder="Add ingredient"
+            type="number"
+            name="price"
+            value={newItem.price}
+            onChange={handleInputChange}
+            placeholder="Price"
             className="input input-bordered input-sm w-full border border-champagne bg-transparent placeholder-champagne text-champagne"
           />
+        </div>
+
+        {/* Ingredients Section */}
+        <div className="flex items-center justify-center mb-2 space-x-2.5">
+          <div>
+            <label>Ingredient</label>
+            <input
+              type="text"
+              name="ingredient"
+              value={ingredientInput}
+              onChange={(e) => setIngredientInput(e.target.value)}
+              placeholder="Add ingredient"
+              className="input input-bordered input-sm w-full border border-champagne bg-transparent placeholder-champagne text-champagne"
+            />
+          </div>
           <Button onClick={addIngredient}>Add Ingredient</Button>
         </div>
 

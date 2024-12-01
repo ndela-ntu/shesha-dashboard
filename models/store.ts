@@ -1,5 +1,5 @@
 import ICoordinate from "./coordinate";
-import IMenu from "./menu";
+import IMenu_item from "./menu_item";
 import IRegion from "./region";
 
 export default interface IStore {
@@ -10,5 +10,5 @@ export default interface IStore {
     description: string;
     coordinates: ICoordinate;
     regions: IRegion;
-    menu: IMenu;
+    menu: IMenu_item;
 }
