@@ -3,10 +3,14 @@
 import { ITEMSCATEGORY } from "@/models/item_category";
 import IMenu_item from "@/models/menu_item";
 import Button from "../button";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { PlusCircle, Trash2 } from "lucide-react";
 
-const MenuItemManager: React.FC = () => {
+export default function MenuItemManager({
+  onItemsChangeCB,
+}: {
+  onItemsChangeCB: (menuItems: IMenu_item[]) => void;
+}) {
   const [menuItems, setMenuItems] = useState<IMenu_item[]>([]);
   const [newItem, setNewItem] = useState<Omit<IMenu_item, "id">>({
     name: "",
@@ -80,12 +84,19 @@ const MenuItemManager: React.FC = () => {
 
   const removeMenuItem = (idToRemove: number) => {
     setMenuItems((prev) => prev.filter((item) => item.id !== idToRemove));
+    
   };
+
+  useEffect(() => {
+    onItemsChangeCB(menuItems); 
+  }, [menuItems]);
 
   return (
     <div className="">
       <div className="flex flex-col space-y-2">
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 gap-x-2">
+          <label>Name</label>
+          <label>Category</label>
           <input
             type="text"
             name="name"
@@ -108,35 +119,44 @@ const MenuItemManager: React.FC = () => {
           </select>
         </div>
 
-        <textarea
-          name="description"
-          value={newItem.description}
-          onChange={(e) => handleInputChange(e)}
-          placeholder="Item Description"
-          className="textarea textarea-bordered w-full border border-champagne bg-transparent placeholder-champagne text-champagne"
-        />
+        <div>
+          <label>Description</label>
+          <textarea
+            name="description"
+            value={newItem.description}
+            onChange={(e) => handleInputChange(e)}
+            placeholder="Item Description"
+            className="textarea textarea-bordered w-full border border-champagne bg-transparent placeholder-champagne text-champagne"
+          />
+        </div>
 
         <div className="flex items-center space-x-2.5">
-          <input
-            type="number"
-            name="price"
-            value={newItem.price}
-            onChange={handleInputChange}
-            placeholder="Price"
-            className="input input-bordered input-sm w-24 border border-champagne bg-transparent placeholder-champagne text-champagne"
-          />
-
-          <div className="flex items-center">
+          <div>
+            <label>Price</label>
             <input
-              type="text"
-              value={ingredientInput}
-              onChange={(e) => setIngredientInput(e.target.value)}
-              placeholder="Add Ingredient"
-              className="input input-bordered input-sm w-full border border-champagne bg-transparent placeholder-champagne text-champagne"
+              type="number"
+              name="price"
+              value={newItem.price}
+              onChange={handleInputChange}
+              placeholder="Price"
+              className="input input-bordered input-sm w-24 border border-champagne bg-transparent placeholder-champagne text-champagne"
             />
+          </div>
+
+          <div className="flex items-end">
+            <div className="flex flex-col">
+              <label>Ingredient</label>
+              <input
+                type="text"
+                value={ingredientInput}
+                onChange={(e) => setIngredientInput(e.target.value)}
+                placeholder="Add Ingredient"
+                className="input input-bordered input-sm w-full border border-champagne bg-transparent placeholder-champagne text-champagne"
+              />
+            </div>
             <button
               onClick={addIngredient}
-              className="bg-green-500 text-white p-2 rounded hover:bg-green-600"
+              className="bg-coralPink text-champagne p-2 rounded"
             >
               <PlusCircle size={20} />
             </button>
@@ -150,7 +170,7 @@ const MenuItemManager: React.FC = () => {
             {newItem.ingredients.map((ingredient) => (
               <span
                 key={ingredient}
-                className="bg-blue-100 px-2 py-1 rounded-full text-sm flex items-center"
+                className="bg-champagne text-asparagus px-2 py-1 rounded-xl text-sm flex items-center"
               >
                 {ingredient}
                 <button
@@ -166,17 +186,17 @@ const MenuItemManager: React.FC = () => {
 
         <button
           onClick={addMenuItem}
-          className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 flex items-center"
+          className="bg-champagne text-asparagus p-2 rounded flex items-center"
         >
           <PlusCircle size={20} className="mr-2" /> Add Menu Item
         </button>
       </div>
 
       {/* Menu Items List */}
-      <div>
-        <h3 className="text-lg font-semibold mb-4">Current Menu Items</h3>
+      <div className="py-2.5">
+        <h3 className="underline">Current Menu Items</h3>
         {menuItems.length === 0 ? (
-          <p className="text-gray-500">No menu items added yet</p>
+          <p className="text-champagne">No menu items added yet</p>
         ) : (
           <div className="space-y-4">
             {menuItems.map((item) => (
@@ -186,7 +206,7 @@ const MenuItemManager: React.FC = () => {
               >
                 <div>
                   <h4 className="font-bold text-xl">{item.name}</h4>
-                  <p className="text-gray-600 mb-2">{item.category}</p>
+                  <p className="text-champagne mb-2">{item.category}</p>
                   <p className="mb-2">{item.description}</p>
                   <p className="font-semibold">
                     Price: R{item.price.toFixed(2)}
@@ -215,6 +235,4 @@ const MenuItemManager: React.FC = () => {
       </div>
     </div>
   );
-};
-
-export default MenuItemManager;
+}

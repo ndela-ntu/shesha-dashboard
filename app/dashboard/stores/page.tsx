@@ -10,10 +10,7 @@ export default async function Page() {
       *,
       coordinates (*),
       regions (*),
-      menus:menus (
-        *,
-        menu_items:menu_items (*)
-      )
+      menu_items (*)
     `);
 
   if (error) {
@@ -28,7 +25,7 @@ export default async function Page() {
           href="/dashboard/stores/new"
           className="flex space-x-1 items-center justify-center bg-coralPink text-champagne px-2 py-1 rounded-xl"
         >
-          <span>New Stores</span>
+          <span>New Store</span>
           <span>
             <Plus />
           </span>

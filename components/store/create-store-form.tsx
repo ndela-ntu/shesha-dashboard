@@ -10,6 +10,7 @@ import MapWrapper from "../map-wrapper";
 import IMenu_item from "@/models/menu_item";
 import MenuItemManager from "./menu-item-manager";
 import Divider from "../divider";
+import Image from "next/image";
 import {
   Dialog,
   DialogClose,
@@ -20,8 +21,10 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { ImageUpload } from "../image-upload";
 
 export default function CreateStoreForm({ regions }: { regions: IRegion[] }) {
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [logoState, setLogoState] = useState<"Upload" | "Default" | null>(null);
   const [gradientStyle, setGradientStyle] = useState<{ background: string }>({
     background: "",
@@ -29,6 +32,7 @@ export default function CreateStoreForm({ regions }: { regions: IRegion[] }) {
   const [defaultLogo, setDefaultLogo] = useState<[string, string] | null>(null);
   const [name, setName] = useState("");
   const [selectedRegion, setSelectedRegion] = useState("0");
+  const [description, setDescription] = useState("");
   const [location, setLocation] = useState<{
     latitude: number;
     longitude: number;
@@ -37,10 +41,6 @@ export default function CreateStoreForm({ regions }: { regions: IRegion[] }) {
     null
   );
   const [menuItems, setMenuItems] = useState<IMenu_item[]>([]);
-
-  const handleMenuSubmit = (menuItem: IMenu_item) => {
-    setMenuItems((prev) => [...prev, menuItem]);
-  };
 
   const handleOnSwitchClick = () => {
     const colors = generateRandomColors();
@@ -93,24 +93,24 @@ export default function CreateStoreForm({ regions }: { regions: IRegion[] }) {
             </Button>
           </div>
           {logoState === "Default" ? (
-            <div
-              style={{ ...gradientStyle }}
-              className={`m-2.5 border border-champagne aspect-square h-64 w-64 rounded-full flex items-center justify-center`}
-            >
-              <button
-                className="bg-coralPink text-asparagus px-2.5 py-1 rounded-xl"
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleOnSwitchClick();
-                }}
+            <div className="flex flex-col items-center justify-center w-full">
+              <div
+                style={{ ...gradientStyle }}
+                className={`m-2.5 border border-champagne aspect-square h-64 w-64 rounded-full flex items-center justify-center`}
               >
-                Switch
-              </button>
+                <button
+                  className="bg-coralPink text-asparagus px-2.5 py-1 rounded-xl"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleOnSwitchClick();
+                  }}
+                >
+                  Switch
+                </button>
+              </div>
             </div>
           ) : (
-            <div className="m-2.5 border border-champagne aspect-square h-64 w-64 flex items-center justify-center">
-              <ImageDown />
-            </div>
+            <ImageUpload onImageUpload={setImageFile} />
           )}
         </div>
         <div>
@@ -132,6 +132,8 @@ export default function CreateStoreForm({ regions }: { regions: IRegion[] }) {
           </label>
           <textarea
             name="description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
             className="textarea textarea-bordered w-full border border-champagne bg-transparent placeholder-champagne text-champagne"
             placeholder="Description"
           ></textarea>
@@ -176,7 +178,9 @@ export default function CreateStoreForm({ regions }: { regions: IRegion[] }) {
             </Button>
             <Dialog>
               <DialogTrigger>
-               <span className="bg-coralPink text-champagne p-2.5 rounded-xl">Choose From Map</span>
+                <span className="bg-coralPink text-champagne p-2.5 rounded-xl">
+                  Choose From Map
+                </span>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
@@ -198,9 +202,7 @@ export default function CreateStoreForm({ regions }: { regions: IRegion[] }) {
                 />
                 <DialogFooter>
                   <DialogClose asChild>
-                    <Button>
-                      Close
-                    </Button>
+                    <Button>Close</Button>
                   </DialogClose>
                 </DialogFooter>
               </DialogContent>
@@ -209,8 +211,8 @@ export default function CreateStoreForm({ regions }: { regions: IRegion[] }) {
         </div>
         <Divider className="my-4" />
         <div>
-          <h2 className="text-xl font-bold">Menu Item Manager</h2>
-          <MenuItemManager />
+          <h2 className="underline">Menu Item Manager</h2>
+          <MenuItemManager onItemsChangeCB={setMenuItems} />
         </div>
       </form>
       <dialog id="location_error" className="modal">
