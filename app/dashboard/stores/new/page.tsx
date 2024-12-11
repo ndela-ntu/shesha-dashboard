@@ -11,10 +11,12 @@ export default async function Page() {
   if (error) {
     return <div>{`An error occurred: ${error.message}`}</div>;
   }
-  
-  return <div className="flex flex-col items-center">
-    <h1>Input New Store</h1>
-    <Divider />
-    <CreateStoreForm regions={regions} />
-  </div>;
+
+  return (
+    <div className="flex flex-col items-center">
+      <h1>Input New Store</h1>
+      <Divider />
+      <CreateStoreForm regions={regions} />
+    </div>
+  );
 }

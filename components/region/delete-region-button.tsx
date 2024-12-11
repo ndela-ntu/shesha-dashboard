@@ -1,6 +1,6 @@
 'use client';
 
-import { deleteRegion } from "@/app/actions/region/region-actions";
+import { deleteRegion } from "@/app/actions/region-actions";
 import { Trash } from "lucide-react";
 
 export default function DeleteRegionButton({ id }: { id: number }) {

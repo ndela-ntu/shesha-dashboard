@@ -2,7 +2,7 @@
 
 import IRegion from "@/models/region";
 import Button from "../button";
-import { useEffect, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import generateRandomColors from "@/utils/generate-random-colors";
 import { ImageDown } from "lucide-react";
 import fetchCurrentLocation from "@/utils/fetch-current-location";
@@ -22,8 +22,16 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { ImageUpload } from "../image-upload";
+import SubmitButton from "../submit-button";
+import { State, createStore } from "@/app/actions/store-actions";
 
 export default function CreateStoreForm({ regions }: { regions: IRegion[] }) {
+  const initialState = { message: null, errors: {} };
+  const [state, formAction] = useActionState<State, FormData>(
+    createStore,
+    initialState
+  );
+
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [logoState, setLogoState] = useState<"Upload" | "Default" | null>(null);
   const [gradientStyle, setGradientStyle] = useState<{ background: string }>({
@@ -41,6 +49,10 @@ export default function CreateStoreForm({ regions }: { regions: IRegion[] }) {
     null
   );
   const [menuItems, setMenuItems] = useState<IMenu_item[]>([]);
+
+  useEffect(() => {
+    setDefaultLogo(generateRandomColors());
+  }, []);
 
   const handleOnSwitchClick = () => {
     const colors = generateRandomColors();
@@ -69,7 +81,26 @@ export default function CreateStoreForm({ regions }: { regions: IRegion[] }) {
     <div className="pb-6">
       <form
         action={(formData) => {
-          console.log(formData.get("region"));
+          if (imageFile) {
+            formData.append("logo", imageFile);
+          } else {
+            formData.append(
+              "defaultLogo",
+              JSON.stringify({ from: defaultLogo?.[0], to: defaultLogo?.[1] })
+            );
+          }
+          formData.append("name", name);
+          formData.append("description", description);
+          formData.append("regionId", selectedRegion);
+          formData.append(
+            "location",
+            JSON.stringify({
+              lat: location?.latitude,
+              lng: location?.longitude,
+            })
+          );
+          formData.append("menu_items", JSON.stringify(menuItems));
+          formAction(formData);
         }}
         className="w-full flex flex-col space-y-2.5"
       >
@@ -112,6 +143,14 @@ export default function CreateStoreForm({ regions }: { regions: IRegion[] }) {
           ) : (
             <ImageUpload onImageUpload={setImageFile} />
           )}
+          <div id="name-error" aria-live="polite" aria-atomic="true">
+            {state.errors?.defaultLogo &&
+              state.errors.defaultLogo.map((error: string, i) => (
+                <p key={i} className="text-sm text-yellow-500">
+                  {error}
+                </p>
+              ))}
+          </div>
         </div>
         <div>
           <label htmlFor="name" className="text-champagne">
@@ -125,6 +164,14 @@ export default function CreateStoreForm({ regions }: { regions: IRegion[] }) {
             className="input input-bordered input-sm w-full border border-champagne bg-transparent placeholder-champagne text-champagne"
             placeholder="Enter store name"
           />
+          <div id="name-error" aria-live="polite" aria-atomic="true">
+            {state.errors?.name &&
+              state.errors.name.map((error: string, i) => (
+                <p key={i} className="text-sm text-yellow-500">
+                  {error}
+                </p>
+              ))}
+          </div>
         </div>
         <div>
           <label htmlFor="description" className="text-champagne">
@@ -137,6 +184,14 @@ export default function CreateStoreForm({ regions }: { regions: IRegion[] }) {
             className="textarea textarea-bordered w-full border border-champagne bg-transparent placeholder-champagne text-champagne"
             placeholder="Description"
           ></textarea>
+          <div id="name-error" aria-live="polite" aria-atomic="true">
+            {state.errors?.description &&
+              state.errors.description.map((error: string, i) => (
+                <p key={i} className="text-sm text-yellow-500">
+                  {error}
+                </p>
+              ))}
+          </div>
         </div>
         <div>
           <label htmlFor="region" className="text-champagne">
@@ -157,6 +212,14 @@ export default function CreateStoreForm({ regions }: { regions: IRegion[] }) {
               </option>
             ))}
           </select>
+          <div id="name-error" aria-live="polite" aria-atomic="true">
+            {state.errors?.regionId &&
+              state.errors.regionId.map((error: string, i) => (
+                <p key={i} className="text-sm text-yellow-500">
+                  {error}
+                </p>
+              ))}
+          </div>
         </div>
         <div>
           <label
@@ -174,13 +237,13 @@ export default function CreateStoreForm({ regions }: { regions: IRegion[] }) {
                 handleOnCurrentLocationClick();
               }}
             >
-              Use Current Location
+              Current Location
             </Button>
             <Dialog>
               <DialogTrigger>
-                <span className="bg-coralPink text-champagne p-2.5 rounded-xl">
+                <div className="bg-coralPink text-champagne p-1.5 rounded-xl">
                   Choose From Map
-                </span>
+                </div>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
@@ -208,12 +271,29 @@ export default function CreateStoreForm({ regions }: { regions: IRegion[] }) {
               </DialogContent>
             </Dialog>
           </div>
+          <div id="name-error" aria-live="polite" aria-atomic="true">
+            {state.errors?.location &&
+              state.errors.location.map((error: string, i) => (
+                <p key={i} className="text-sm text-yellow-500">
+                  {error}
+                </p>
+              ))}
+          </div>
         </div>
         <Divider className="my-4" />
         <div>
           <h2 className="underline">Menu Item Manager</h2>
           <MenuItemManager onItemsChangeCB={setMenuItems} />
+          <div id="name-error" aria-live="polite" aria-atomic="true">
+            {state.errors?.menuItems &&
+              state.errors.menuItems.map((error: string, i) => (
+                <p key={i} className="text-sm text-yellow-500">
+                  {error}
+                </p>
+              ))}
+          </div>
         </div>
+        <SubmitButton className="fixed bottom-4 right-4">Save</SubmitButton>
       </form>
       <dialog id="location_error" className="modal">
         <div className="modal-box bg-coralPink text-champagne">

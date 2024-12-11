@@ -7,7 +7,7 @@ import {
   State,
   editRegion,
   saveRegion,
-} from "@/app/actions/region/region-actions";
+} from "@/app/actions/region-actions";
 import MapWrapper from "../map-wrapper";
 
 export default function EditRegionForm({

@@ -49,7 +49,7 @@ export async function saveRegion(prevState: State, formData: FormData) {
     // If validation fails, return the error messages
     return {
       errors: result.error.flatten().fieldErrors,
-      message: "Missing Fields. Failed to create invoice",
+      message: "Missing Fields. Failed to create region",
     };
   }
 

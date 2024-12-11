@@ -26,6 +26,7 @@ export default function MenuItemManager({
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
     >
   ) => {
+    e.preventDefault();
     const { name, value } = e.target;
     setNewItem((prev) => ({
       ...prev,
@@ -84,11 +85,10 @@ export default function MenuItemManager({
 
   const removeMenuItem = (idToRemove: number) => {
     setMenuItems((prev) => prev.filter((item) => item.id !== idToRemove));
-    
   };
 
   useEffect(() => {
-    onItemsChangeCB(menuItems); 
+    onItemsChangeCB(menuItems);
   }, [menuItems]);
 
   return (
@@ -155,7 +155,11 @@ export default function MenuItemManager({
               />
             </div>
             <button
-              onClick={addIngredient}
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                addIngredient();
+              }}
               className="bg-coralPink text-champagne p-2 rounded"
             >
               <PlusCircle size={20} />
@@ -174,6 +178,7 @@ export default function MenuItemManager({
               >
                 {ingredient}
                 <button
+                  type="button"
                   onClick={() => removeIngredient(ingredient)}
                   className="ml-2 text-red-500"
                 >
@@ -185,7 +190,11 @@ export default function MenuItemManager({
         </div>
 
         <button
-          onClick={addMenuItem}
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            addMenuItem();
+          }}
           className="bg-champagne text-asparagus p-2 rounded flex items-center"
         >
           <PlusCircle size={20} className="mr-2" /> Add Menu Item
@@ -223,6 +232,7 @@ export default function MenuItemManager({
                   </div>
                 </div>
                 <button
+                  type="button"
                   onClick={() => removeMenuItem(item.id)}
                   className="text-red-500 hover:text-red-700"
                 >

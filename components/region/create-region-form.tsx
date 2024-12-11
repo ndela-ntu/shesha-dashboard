@@ -3,7 +3,7 @@
 import IRegion from "@/models/region";
 import SubmitButton from "../submit-button";
 import { useActionState, useState } from "react";
-import { State, saveRegion } from "@/app/actions/region/region-actions";
+import { State, saveRegion } from "@/app/actions/region-actions";
 import MapWrapper from "../map-wrapper";
 
 export default function CreateRegionForm({ regions }: { regions: IRegion[] }) {
