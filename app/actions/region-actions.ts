@@ -110,7 +110,7 @@ export async function editRegion(prevState: State, formData: FormData) {
     const { data: coordinates, error: coordError } = await (await supabase)
       .from("coordinates")
       .update({ lat: latitude, lng: longitude })
-      .eq("id", parseInt(regionId))
+      .eq("id", parseInt(coordinateId))
       .select();
 
     if (coordError) throw coordError;
@@ -118,11 +118,12 @@ export async function editRegion(prevState: State, formData: FormData) {
     const { data, error } = await (await supabase)
       .from("regions")
       .update({ name })
-      .eq("id", parseInt(coordinateId))
+      .eq("id", parseInt(regionId))
       .select();
 
     if (error) throw error;
   } catch (error) {
+    console.error(error);
     return {
       message: "Failed to save region. Please try again.",
     };

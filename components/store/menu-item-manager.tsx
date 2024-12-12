@@ -8,10 +8,12 @@ import { PlusCircle, Trash2 } from "lucide-react";
 
 export default function MenuItemManager({
   onItemsChangeCB,
+  initMenuItems,
 }: {
   onItemsChangeCB: (menuItems: IMenu_item[]) => void;
+  initMenuItems?: IMenu_item[];
 }) {
-  const [menuItems, setMenuItems] = useState<IMenu_item[]>([]);
+  const [menuItems, setMenuItems] = useState<IMenu_item[]>(initMenuItems ? initMenuItems : []);
   const [newItem, setNewItem] = useState<Omit<IMenu_item, "id">>({
     name: "",
     description: "",
@@ -33,6 +35,13 @@ export default function MenuItemManager({
       [name]: name === "price" ? Number(value) : value,
     }));
   };
+
+  useEffect(() => {
+    console.log(initMenuItems);
+    if (initMenuItems) {
+      setMenuItems(initMenuItems);
+    }
+  }, []);
 
   const addIngredient = () => {
     if (ingredientInput.trim()) {

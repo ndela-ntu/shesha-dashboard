@@ -23,12 +23,19 @@ import {
 } from "@/components/ui/dialog";
 import { ImageUpload } from "../image-upload";
 import SubmitButton from "../submit-button";
-import { State, createStore } from "@/app/actions/store-actions";
+import { State, createStore, editStore } from "@/app/actions/store-actions";
+import IStore from "@/models/store";
 
-export default function CreateStoreForm({ regions }: { regions: IRegion[] }) {
+export default function EditStoreForm({
+  regions,
+  store,
+}: {
+  regions: IRegion[];
+  store: IStore;
+}) {
   const initialState = { message: null, errors: {} };
   const [state, formAction] = useActionState<State, FormData>(
-    createStore,
+    editStore,
     initialState
   );
 
@@ -37,22 +44,26 @@ export default function CreateStoreForm({ regions }: { regions: IRegion[] }) {
   const [gradientStyle, setGradientStyle] = useState<{ background: string }>({
     background: "",
   });
-  const [defaultLogo, setDefaultLogo] = useState<[string, string] | null>(null);
-  const [name, setName] = useState("");
-  const [selectedRegion, setSelectedRegion] = useState("0");
-  const [description, setDescription] = useState("");
+  const [defaultLogo, setDefaultLogo] = useState<[string, string]>([
+    store.defaultLogo.from,
+    store.defaultLogo.to,
+  ]);
+  const [name, setName] = useState(store.name);
+  const [selectedRegion, setSelectedRegion] = useState(
+    store.regions.id.toString()
+  );
+  const [description, setDescription] = useState(store.description);
   const [location, setLocation] = useState<{
     latitude: number;
     longitude: number;
-  } | null>(null);
+  } | null>({
+    latitude: store.coordinates.lat,
+    longitude: store.coordinates.lng,
+  });
   const [currLocationError, setCurrLocationError] = useState<string | null>(
     null
   );
-  const [menuItems, setMenuItems] = useState<IMenu_item[]>([]);
-
-  useEffect(() => {
-    setDefaultLogo(generateRandomColors());
-  }, []);
+  const [menuItems, setMenuItems] = useState<IMenu_item[]>(store.menu_items);
 
   const handleOnSwitchClick = () => {
     const colors = generateRandomColors();
@@ -84,7 +95,11 @@ export default function CreateStoreForm({ regions }: { regions: IRegion[] }) {
           if (imageFile) {
             formData.append("logo", imageFile);
           }
-          
+
+          if (store.logoUrl) {
+            formData.append("currentLogoUrl", store.logoUrl);
+          }
+
           formData.append(
             "defaultLogo",
             JSON.stringify({ from: defaultLogo?.[0], to: defaultLogo?.[1] })
@@ -104,6 +119,8 @@ export default function CreateStoreForm({ regions }: { regions: IRegion[] }) {
         }}
         className="w-full flex flex-col space-y-2.5"
       >
+        <input type="hidden" name="storeId" value={store.id} />
+        <input type="hidden" name="coordinateId" value={store.coordinates.id} />
         <div>
           <label>Logo</label>
           <div className="flex w-full space-x-1">
@@ -141,7 +158,10 @@ export default function CreateStoreForm({ regions }: { regions: IRegion[] }) {
               </div>
             </div>
           ) : (
-            <ImageUpload onImageUpload={setImageFile} />
+            <ImageUpload
+              initImageUrl={store.logoUrl}
+              onImageUpload={setImageFile}
+            />
           )}
           <div id="name-error" aria-live="polite" aria-atomic="true">
             {state.errors?.defaultLogo &&
@@ -283,7 +303,10 @@ export default function CreateStoreForm({ regions }: { regions: IRegion[] }) {
         <Divider className="my-4" />
         <div>
           <h2 className="underline">Menu Item Manager</h2>
-          <MenuItemManager onItemsChangeCB={setMenuItems} />
+          <MenuItemManager
+            initMenuItems={menuItems}
+            onItemsChangeCB={setMenuItems}
+          />
           <div id="name-error" aria-live="polite" aria-atomic="true">
             {state.errors?.menuItems &&
               state.errors.menuItems.map((error: string, i) => (

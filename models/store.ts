@@ -10,5 +10,5 @@ export default interface IStore {
     description: string;
     coordinates: ICoordinate;
     regions: IRegion;
-    menu: IMenu_item;
+    menu_items: IMenu_item[];
 }

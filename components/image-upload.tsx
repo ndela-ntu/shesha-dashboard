@@ -6,9 +6,10 @@ import Button from "./button";
 
 interface ImageUploadProps {
   onImageUpload: (file: File | null) => void;
+  initImageUrl?: string;
 }
 
-export function ImageUpload({ onImageUpload }: ImageUploadProps) {
+export function ImageUpload({ onImageUpload, initImageUrl }: ImageUploadProps) {
   const [preview, setPreview] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -54,6 +55,12 @@ export function ImageUpload({ onImageUpload }: ImageUploadProps) {
             <img
               src={preview}
               alt="Preview"
+              className="w-full h-full object-cover"
+            />
+          ) : initImageUrl ? (
+            <img
+              src={initImageUrl}
+              alt="current image"
               className="w-full h-full object-cover"
             />
           ) : (
