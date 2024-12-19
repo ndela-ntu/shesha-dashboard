@@ -119,6 +119,16 @@ export async function createStore(prevState: State, formData: FormData) {
       throw new Error(`Error creating coordinates: ${coordError}`);
     }
 
+    const { data: defaultLogoData, error: logoError } = await (await supabase)
+      .from("default_logos")
+      .insert({ from: defaultLogo.from, to: defaultLogo.to })
+      .select()
+      .single();
+
+    if (logoError) {
+      throw new Error(`Error creating coordinates: ${logoError.message}`);
+    }
+
     const { data: store, error: storeError } = await (
       await supabase
     )
@@ -126,10 +136,10 @@ export async function createStore(prevState: State, formData: FormData) {
       .insert({
         name,
         logoUrl,
-        defaultLogo,
         description,
         region_ref: parseInt(regionId),
         location_ref: coordinates.id,
+        default_logo_ref: defaultLogoData.id,
       })
       .select()
       .single();
