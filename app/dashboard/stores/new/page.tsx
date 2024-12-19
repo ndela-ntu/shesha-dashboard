@@ -14,7 +14,7 @@ export default async function Page() {
 
   return (
     <div className="flex flex-col items-center">
-      <h1>Input New Store</h1>
+      <h1>New Store</h1>
       <Divider />
       <CreateStoreForm regions={regions} />
     </div>
