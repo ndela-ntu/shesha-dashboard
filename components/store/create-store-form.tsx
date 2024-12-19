@@ -24,6 +24,7 @@ import {
 import { ImageUpload } from "../image-upload";
 import SubmitButton from "../submit-button";
 import { State, createStore } from "@/app/actions/store-actions";
+import MultiDayPicker from "../multi-day-picker";
 
 export default function CreateStoreForm({ regions }: { regions: IRegion[] }) {
   const initialState = { message: null, errors: {} };
@@ -49,6 +50,7 @@ export default function CreateStoreForm({ regions }: { regions: IRegion[] }) {
     null
   );
   const [menuItems, setMenuItems] = useState<IMenu_item[]>([]);
+  const [selectedDays, setSelectedDays] = useState<string[]>([]);
 
   useEffect(() => {
     setDefaultLogo(generateRandomColors());
@@ -84,7 +86,7 @@ export default function CreateStoreForm({ regions }: { regions: IRegion[] }) {
           if (imageFile) {
             formData.append("logo", imageFile);
           }
-          
+
           formData.append(
             "defaultLogo",
             JSON.stringify({ from: defaultLogo?.[0], to: defaultLogo?.[1] })
@@ -279,6 +281,33 @@ export default function CreateStoreForm({ regions }: { regions: IRegion[] }) {
                 </p>
               ))}
           </div>
+        </div>
+        <div>
+          <label htmlFor="">Operation Time</label>
+          <div className="flex space-x-2.5">
+            <div className="flex flex-col w-full ">
+              <label htmlFor="fromTime" className="text-champagne">
+                From
+              </label>
+              <input
+                type="time"
+                className="bg-transparent border border-champagne"
+              />
+            </div>
+            <div className="flex flex-col w-full">
+              <label htmlFor="toTime" className="text-champagne">
+                To
+              </label>
+              <input
+                type="time"
+                className="bg-transparent border border-champagne"
+              />
+            </div>
+          </div>
+        </div>
+        <div>
+          <label>Operation Days</label>
+          <MultiDayPicker onChange={setSelectedDays} />
         </div>
         <Divider className="my-4" />
         <div>
