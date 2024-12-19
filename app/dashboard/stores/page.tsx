@@ -9,6 +9,7 @@ export default async function Page() {
   const { data: stores, error } = await (await supabase).from("stores").select(`
       *,
       coordinates (*),
+      default_logos (*),
       regions (*),
       menu_items (*)
     `);

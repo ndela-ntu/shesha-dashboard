@@ -7,9 +7,11 @@ import Button from "./button";
 interface ImageUploadProps {
   onImageUpload: (file: File | null) => void;
   initImageUrl?: string;
+  imageRemoved?: (value: boolean) => void;
 }
 
-export function ImageUpload({ onImageUpload, initImageUrl }: ImageUploadProps) {
+export function ImageUpload({ onImageUpload, initImageUrl, imageRemoved }: ImageUploadProps) {
+  const [initImageUrlState, setInitImageUrlState] = useState<string | undefined> (initImageUrl);
   const [preview, setPreview] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -37,11 +39,17 @@ export function ImageUpload({ onImageUpload, initImageUrl }: ImageUploadProps) {
   };
 
   const handleRemoveImage = () => {
-    setPreview(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
+    if (preview) {
+      setPreview(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+      onImageUpload(null);
+    }else if (initImageUrl) {
+      imageRemoved!(true);
+      setInitImageUrlState(undefined);
+      onImageUpload(null);
     }
-    onImageUpload(null);
   };
 
   return (
@@ -57,9 +65,9 @@ export function ImageUpload({ onImageUpload, initImageUrl }: ImageUploadProps) {
               alt="Preview"
               className="w-full h-full object-cover"
             />
-          ) : initImageUrl ? (
+          ) : initImageUrlState ? (
             <img
-              src={initImageUrl}
+              src={initImageUrlState}
               alt="current image"
               className="w-full h-full object-cover"
             />
@@ -67,7 +75,7 @@ export function ImageUpload({ onImageUpload, initImageUrl }: ImageUploadProps) {
             <Upload className="w-8 h-8 text-champagne" />
           )}
         </Button>
-        {preview && (
+        {(preview || initImageUrlState) && (
           <Button
             onClick={handleRemoveImage}
             className="absolute bg-red-500 text-white -top-2 -right-2 rounded-full"

@@ -21,7 +21,7 @@ export default function StoreListItem({ store }: { store: IStore }) {
             />
           ) : (
             <DefaultAvatar
-              defaultColors={store.defaultLogo}
+              defaultColors={store.default_logos}
               name={store.name}
             />
           )}

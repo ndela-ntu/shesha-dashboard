@@ -188,10 +188,13 @@ export async function editStore(prevState: State, formData: FormData) {
       result.data;
     const storeId = formData.get("storeId") as string;
     const coordinateId = formData.get("coordinateId") as string;
+    const defaultLogoId = formData.get("defaultLogoId") as string;
 
     let currentLogoUrl = formData.get("currentLogoUrl") as string | null;
     const logo = formData.get("logo") as File | null;
+    const logoRemoved = formData.get("logoRemoved") as string;
 
+    //Logo Replacement
     if (logo && logo.size > 0) {
       if (currentLogoUrl) {
         const oldLogoPath = currentLogoUrl.split("/").pop();
@@ -209,8 +212,9 @@ export async function editStore(prevState: State, formData: FormData) {
       ).storage
         .from("shesha-bucket")
         .upload(`logos/${Date.now()}-${logo.name}`, logo);
+
       if (imageError) {
-        throw new Error(`Failed to upload image: ${imageError}`);
+        throw new Error(`Failed to upload image: ${imageError.message}`);
       }
 
       const {
@@ -220,7 +224,20 @@ export async function editStore(prevState: State, formData: FormData) {
         .getPublicUrl(imageData.path);
 
       currentLogoUrl = publicUrl;
+    } //Logo removal
+    else if (logoRemoved === "true") {
+      if (currentLogoUrl) {
+        const oldLogoPath = currentLogoUrl.split("/").pop();
+        if (oldLogoPath) {
+          await (await supabase).storage
+            .from("shesha-bucket")
+            .remove([`logos/${oldLogoPath}`]);
+        } else {
+          throw new Error("Unable to resolve old logo path");
+        }
+      }
     }
+
     const { data: coordinates, error: coordError } = await (await supabase)
       .from("coordinates")
       .update({ lat: location.lat, lng: location.lng })
@@ -229,7 +246,18 @@ export async function editStore(prevState: State, formData: FormData) {
       .single();
 
     if (coordError) {
-      throw new Error(`Error creating coordinates: ${coordError}`);
+      throw new Error(`Error editing coordinates: ${coordError}`);
+    }
+
+    const { data: defaultLogoData, error: logoError } = await (await supabase)
+      .from("default_logos")
+      .update({ from: defaultLogo.from, to: defaultLogo.to })
+      .eq("id", parseInt(defaultLogoId))
+      .select()
+      .single();
+
+    if (logoError) {
+      throw new Error(`Error editing defaultLogo: ${logoError.message}`);
     }
 
     const { data: store, error: storeError } = await (
@@ -238,11 +266,11 @@ export async function editStore(prevState: State, formData: FormData) {
       .from("stores")
       .update({
         name,
-        logoUrl: currentLogoUrl,
-        defaultLogo,
+        logoUrl: logoRemoved === "true" ? null : currentLogoUrl,
         description,
         region_ref: parseInt(regionId),
         location_ref: coordinates.id,
+        default_logo_ref: defaultLogoData.id,
       })
       .eq("id", parseInt(storeId))
       .select(
@@ -252,37 +280,54 @@ export async function editStore(prevState: State, formData: FormData) {
       .single();
 
     if (storeError) {
-      throw new Error(`Error creating store: ${storeError}`);
+      throw new Error(`Error creating store: ${storeError.message}`);
     }
 
     menuItems.forEach(async (menuItem) => {
       //Check for newness, no update
       if (menuItem.id.toString().length === 13) {
+        console.log("Inserting new");
         //Is Date/Is New - insert new
         const { data: menuItemData, error: menuItemError } = await (
           await supabase
         )
           .from("menu_items")
           .insert({
-            ...menuItem,
+            name: menuItem.name,
+            description: menuItem.description,
+            ingredients: menuItem.ingredients,
+            price: menuItem.price,
             category: menuItem.category.toUpperCase(),
             store_ref: store.id,
           });
 
         if (menuItemError) {
-          throw new Error(`Error creating menuItem: ${menuItemError}`);
+          throw new Error(`Error creating menuItem: ${menuItemError.message}`);
         }
       }
-      const dbMenuItems: Omit<IMenu_item, "category">[] = store.menu_items;
+    });
+    const dbMenuItems: IMenu_item[] = store.menu_items;
+    const menuItemIds = menuItems.map((item) => item.id);
+    const filteredDbMenuItems = dbMenuItems.filter(
+      (item) => !menuItemIds.includes(item.id)
+    );
 
-      if (!dbMenuItems.includes(menuItem)) {
+    if (filteredDbMenuItems.length > 0) {
+      console.log("Deleting old");
+      filteredDbMenuItems.forEach(async (dbItem) => {
         //Item not available any longer - delete old
         const { error: deleteMenuItemError } = await (await supabase)
           .from("menu_items")
           .delete()
-          .eq("id", menuItem.id);
-      }
-    });
+          .eq("id", dbItem.id);
+
+        if (deleteMenuItemError) {
+          throw new Error(
+            `Error deleting menu item: ${deleteMenuItemError.message}`
+          );
+        }
+      });
+    }
   } catch (error) {
     console.error(error);
     return { message: "Failed to save store. Please try again." };

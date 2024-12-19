@@ -19,6 +19,7 @@ export default async function Page({
     .select(
       `
       *,
+      default_logos (*),
       coordinates (*),
       regions (*),
       menu_items (*)

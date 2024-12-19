@@ -45,8 +45,8 @@ export default function EditStoreForm({
     background: "",
   });
   const [defaultLogo, setDefaultLogo] = useState<[string, string]>([
-    store.defaultLogo.from,
-    store.defaultLogo.to,
+    store.default_logos.from,
+    store.default_logos.to,
   ]);
   const [name, setName] = useState(store.name);
   const [selectedRegion, setSelectedRegion] = useState(
@@ -64,6 +64,7 @@ export default function EditStoreForm({
     null
   );
   const [menuItems, setMenuItems] = useState<IMenu_item[]>(store.menu_items);
+  const [imageRemoved, setImageRemoved] = useState<boolean>(false);
 
   const handleOnSwitchClick = () => {
     const colors = generateRandomColors();
@@ -100,6 +101,10 @@ export default function EditStoreForm({
             formData.append("currentLogoUrl", store.logoUrl);
           }
 
+          if (imageRemoved) {
+            formData.append("logoRemoved", "true")
+          }
+
           formData.append(
             "defaultLogo",
             JSON.stringify({ from: defaultLogo?.[0], to: defaultLogo?.[1] })
@@ -119,6 +124,7 @@ export default function EditStoreForm({
         }}
         className="w-full flex flex-col space-y-2.5"
       >
+        <input type="hidden" name="defaultLogoId" value={store.default_logos.id} />
         <input type="hidden" name="storeId" value={store.id} />
         <input type="hidden" name="coordinateId" value={store.coordinates.id} />
         <div>
@@ -161,6 +167,7 @@ export default function EditStoreForm({
             <ImageUpload
               initImageUrl={store.logoUrl}
               onImageUpload={setImageFile}
+              imageRemoved={setImageRemoved}
             />
           )}
           <div id="name-error" aria-live="polite" aria-atomic="true">
