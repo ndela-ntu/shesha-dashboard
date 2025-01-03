@@ -47,13 +47,13 @@ export default function EditStoreForm({
   const [toTime, setToTime] = useState<string>(store.store_operating_hours.to);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [logoState, setLogoState] = useState<"Upload" | "Default" | null>(null);
-  const [gradientStyle, setGradientStyle] = useState<{ background: string }>({
-    background: "",
-  });
   const [defaultLogo, setDefaultLogo] = useState<[string, string]>([
     store.default_logos.from,
     store.default_logos.to,
   ]);
+  const [gradientStyle, setGradientStyle] = useState<{ background: string }>({
+    background: `linear-gradient(135deg, ${defaultLogo[0]}, ${defaultLogo[1]})`,
+  });
   const [name, setName] = useState(store.name);
   const [selectedRegion, setSelectedRegion] = useState(
     store.regions.id.toString()

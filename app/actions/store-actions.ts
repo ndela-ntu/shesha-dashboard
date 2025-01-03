@@ -217,7 +217,10 @@ export async function createStore(prevState: State, formData: FormData) {
       )
         .from("menu_items")
         .insert({
-          ...menuItem,
+          name: menuItem.name,
+          description: menuItem.description,
+          price: menuItem.price,
+          ingredients: menuItem.ingredients,
           category: menuItem.category.toUpperCase(),
           store_ref: store.id,
         });
