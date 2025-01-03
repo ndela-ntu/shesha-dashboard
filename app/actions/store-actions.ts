@@ -6,6 +6,16 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
+const daysOfWeek = [
+  "monday",
+  "tuesday",
+  "wednesday",
+  "thursday",
+  "friday",
+  "saturday",
+  "sunday",
+] as const;
+
 const supabase = createClient();
 
 const StoreSchema = z.object({
@@ -30,6 +40,21 @@ const StoreSchema = z.object({
     .refine((obj) => Object.keys(obj).length > 1, {
       message: "Object must contain at least one key-value pair",
     }),
+  fromTime: z
+    .string()
+    .regex(
+      /^(0?[1-9]|1[0-2]):[0-5][0-9]:00\s?(AM|PM)$/i,
+      "Invalid time format. Please use HH:MM AM/PM."
+    ),
+  toTime: z
+    .string()
+    .regex(
+      /^(0?[1-9]|1[0-2]):[0-5][0-9]:00\s?(AM|PM)$/i,
+      "Invalid time format. Please use HH:MM AM/PM."
+    ),
+  days: z
+    .array(z.enum(daysOfWeek))
+    .nonempty("At least one day must be selected"),
   menuItems: z
     .array(
       z.object({
@@ -52,6 +77,9 @@ export type State = {
     menuItems?: string[];
     regionId?: string[];
     location?: string[];
+    fromTime?: string[];
+    toTime?: string[];
+    days?: string[];
   };
   message?: string | null;
 };
@@ -67,6 +95,9 @@ export async function createStore(prevState: State, formData: FormData) {
     name: formData.get("name"),
     description: formData.get("description"),
     location: JSON.parse(formData.get("location") as string),
+    fromTime: formData.get("fromTime"),
+    toTime: formData.get("toTime"),
+    days: JSON.parse(formData.get("days") as string)["days"],
     menuItems: JSON.parse(formData.get("menu_items") as string),
   });
 
@@ -78,8 +109,17 @@ export async function createStore(prevState: State, formData: FormData) {
   }
 
   try {
-    const { regionId, defaultLogo, name, description, location, menuItems } =
-      result.data;
+    const {
+      regionId,
+      defaultLogo,
+      name,
+      description,
+      location,
+      fromTime,
+      toTime,
+      days,
+      menuItems,
+    } = result.data;
 
     const logo = formData.get("logo") as File | null;
     let logoUrl: string | null = null;
@@ -129,6 +169,28 @@ export async function createStore(prevState: State, formData: FormData) {
       throw new Error(`Error creating coordinates: ${logoError.message}`);
     }
 
+    const jsonDays = daysOfWeek.map((dayOfWeek) => {
+      if (days.includes(dayOfWeek)) {
+        return { [dayOfWeek]: "active" };
+      }
+
+      return { [dayOfWeek]: "inactive" };
+    });
+
+    const { data: operatingHours, error: operatingError } = await (
+      await supabase
+    )
+      .from("store_operating_hours")
+      .insert({ from: fromTime, to: toTime, days: jsonDays })
+      .select()
+      .single();
+
+    if (operatingError) {
+      throw new Error(
+        `Error creating operating hours: ${operatingError.message}`
+      );
+    }
+
     const { data: store, error: storeError } = await (
       await supabase
     )
@@ -140,6 +202,7 @@ export async function createStore(prevState: State, formData: FormData) {
         region_ref: parseInt(regionId),
         location_ref: coordinates.id,
         default_logo_ref: defaultLogoData.id,
+        operating_hours_ref: operatingHours.id,
       })
       .select()
       .single();
@@ -183,6 +246,9 @@ export async function editStore(prevState: State, formData: FormData) {
     name: formData.get("name"),
     description: formData.get("description"),
     location: JSON.parse(formData.get("location") as string),
+    fromTime: formData.get("fromTime"),
+    toTime: formData.get("toTime"),
+    days: JSON.parse(formData.get("days") as string)["days"],
     menuItems: JSON.parse(formData.get("menu_items") as string),
   });
 
@@ -194,9 +260,22 @@ export async function editStore(prevState: State, formData: FormData) {
   }
 
   try {
-    const { regionId, defaultLogo, name, description, location, menuItems } =
-      result.data;
+    const {
+      regionId,
+      defaultLogo,
+      name,
+      description,
+      location,
+      fromTime,
+      toTime,
+      days,
+      menuItems,
+    } = result.data;
+
     const storeId = formData.get("storeId") as string;
+    const storeOperatingHoursId = formData.get(
+      "storeOperatingTimeId"
+    ) as string;
     const coordinateId = formData.get("coordinateId") as string;
     const defaultLogoId = formData.get("defaultLogoId") as string;
 
@@ -270,6 +349,29 @@ export async function editStore(prevState: State, formData: FormData) {
       throw new Error(`Error editing defaultLogo: ${logoError.message}`);
     }
 
+    const jsonDays = daysOfWeek.map((dayOfWeek) => {
+      if (days.includes(dayOfWeek)) {
+        return { [dayOfWeek]: "active" };
+      }
+
+      return { [dayOfWeek]: "inactive" };
+    });
+
+    const { data: operatingHours, error: operatingError } = await (
+      await supabase
+    )
+      .from("store_operating_hours")
+      .update({ from: fromTime, to: toTime, days: jsonDays })
+      .eq("id", parseInt(storeOperatingHoursId))
+      .select()
+      .single();
+
+    if (operatingError) {
+      throw new Error(
+        `Error creating operating hours: ${operatingError.message}`
+      );
+    }
+
     const { data: store, error: storeError } = await (
       await supabase
     )
@@ -281,6 +383,7 @@ export async function editStore(prevState: State, formData: FormData) {
         region_ref: parseInt(regionId),
         location_ref: coordinates.id,
         default_logo_ref: defaultLogoData.id,
+        operating_hours_ref: operatingHours.id,
       })
       .eq("id", parseInt(storeId))
       .select(

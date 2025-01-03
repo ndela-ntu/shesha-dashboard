@@ -1,5 +1,6 @@
 import Divider from "@/components/divider";
 import EditStoreForm from "@/components/store/edit-store-form";
+import IStore from "@/models/store";
 import { createClient } from "@/utils/supabase/server";
 import { notFound } from "next/navigation";
 
@@ -18,12 +19,13 @@ export default async function Page({
     .from("stores")
     .select(
       `
-      *,
-      default_logos (*),
-      coordinates (*),
-      regions (*),
-      menu_items (*)
-    `
+    *,
+    regions (*),
+    default_logos (*),
+    coordinates (*),
+    menu_items (*),
+    store_operating_hours (*)
+  `
     )
     .eq("id", id)
     .single();
@@ -32,14 +34,12 @@ export default async function Page({
     .from("regions")
     .select(`*, coordinates (id, lat, lng)`);
 
-  if (!store) {
-    return notFound();
+  if (storeError || regionError) {
+    return <div>{`${storeError?.message || regionError?.message}`}</div>;
   }
 
-  if (storeError || regionError) {
-    return (
-      <div>{`An error occurred: ${storeError?.message || regionError?.message}`}</div>
-    );
+  if (!store) {
+    return notFound();
   }
 
   return (

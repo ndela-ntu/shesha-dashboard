@@ -25,6 +25,7 @@ import { ImageUpload } from "../image-upload";
 import SubmitButton from "../submit-button";
 import { State, createStore } from "@/app/actions/store-actions";
 import MultiDayPicker from "../multi-day-picker";
+import convertTo12HourFormat from "@/utils/to-twelve-hour";
 
 export default function CreateStoreForm({ regions }: { regions: IRegion[] }) {
   const initialState = { message: null, errors: {} };
@@ -33,6 +34,8 @@ export default function CreateStoreForm({ regions }: { regions: IRegion[] }) {
     initialState
   );
 
+  const [fromTime, setFromTime] = useState<string>("");
+  const [toTime, setToTime] = useState<string>("");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [logoState, setLogoState] = useState<"Upload" | "Default" | null>(null);
   const [gradientStyle, setGradientStyle] = useState<{ background: string }>({
@@ -102,6 +105,10 @@ export default function CreateStoreForm({ regions }: { regions: IRegion[] }) {
             })
           );
           formData.append("menu_items", JSON.stringify(menuItems));
+          formData.append("fromTime", convertTo12HourFormat(fromTime));
+          formData.append("toTime", convertTo12HourFormat(toTime));
+          formData.append("days", JSON.stringify({ days: selectedDays }));
+
           formAction(formData);
         }}
         className="w-full flex flex-col space-y-2.5"
@@ -290,24 +297,54 @@ export default function CreateStoreForm({ regions }: { regions: IRegion[] }) {
                 From
               </label>
               <input
+                onChange={(e) => {
+                  setFromTime(e.target.value);
+                }}
                 type="time"
                 className="bg-transparent border border-champagne"
               />
+              <div id="name-error" aria-live="polite" aria-atomic="true">
+                {state.errors?.fromTime &&
+                  state.errors.fromTime.map((error: string, i) => (
+                    <p key={i} className="text-sm text-yellow-500">
+                      {error}
+                    </p>
+                  ))}
+              </div>
             </div>
             <div className="flex flex-col w-full">
               <label htmlFor="toTime" className="text-champagne">
                 To
               </label>
               <input
+                onChange={(e) => {
+                  setToTime(e.target.value);
+                }}
                 type="time"
                 className="bg-transparent border border-champagne"
               />
+              <div id="name-error" aria-live="polite" aria-atomic="true">
+                {state.errors?.toTime &&
+                  state.errors.toTime.map((error: string, i) => (
+                    <p key={i} className="text-sm text-yellow-500">
+                      {error}
+                    </p>
+                  ))}
+              </div>
             </div>
           </div>
         </div>
         <div>
           <label>Operation Days</label>
           <MultiDayPicker onChange={setSelectedDays} />
+          <div id="name-error" aria-live="polite" aria-atomic="true">
+            {state.errors?.days &&
+              state.errors.days.map((error: string, i) => (
+                <p key={i} className="text-sm text-yellow-500">
+                  {error}
+                </p>
+              ))}
+          </div>
         </div>
         <Divider className="my-4" />
         <div>

@@ -16,17 +16,17 @@ export default async function Page({ params }: { params: Promise<{id: string}> }
   let regionToEdit: IRegion | null = null;
 
   if (regions) {
-    regionToEdit = regions?.find((region) => {
+    regionToEdit = regions?.find((region: IRegion) => {
       return region.id === parseFloat(id.toString());
     });
   }
 
-  if (!regionToEdit) {
-    return notFound();
-  }
-
   if (error) {
     return <div>{`An error occurred: ${error.message}`}</div>;
+  }
+
+  if (!regionToEdit) {
+    return notFound();
   }
 
   return (

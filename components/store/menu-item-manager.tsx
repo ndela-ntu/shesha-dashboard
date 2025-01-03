@@ -37,7 +37,6 @@ export default function MenuItemManager({
   };
 
   useEffect(() => {
-    console.log(initMenuItems);
     if (initMenuItems) {
       setMenuItems(initMenuItems);
     }

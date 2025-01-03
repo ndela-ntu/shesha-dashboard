@@ -25,6 +25,8 @@ import { ImageUpload } from "../image-upload";
 import SubmitButton from "../submit-button";
 import { State, createStore, editStore } from "@/app/actions/store-actions";
 import IStore from "@/models/store";
+import MultiDayPicker from "../multi-day-picker";
+import convertTo12HourFormat from "@/utils/to-twelve-hour";
 
 export default function EditStoreForm({
   regions,
@@ -39,6 +41,10 @@ export default function EditStoreForm({
     initialState
   );
 
+  const [fromTime, setFromTime] = useState<string>(
+    store.store_operating_hours.from
+  );
+  const [toTime, setToTime] = useState<string>(store.store_operating_hours.to);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [logoState, setLogoState] = useState<"Upload" | "Default" | null>(null);
   const [gradientStyle, setGradientStyle] = useState<{ background: string }>({
@@ -65,6 +71,11 @@ export default function EditStoreForm({
   );
   const [menuItems, setMenuItems] = useState<IMenu_item[]>(store.menu_items);
   const [imageRemoved, setImageRemoved] = useState<boolean>(false);
+  const [selectedDays, setSelectedDays] = useState<string[]>(
+    store.store_operating_hours.days
+      .filter((dayStatus) => Object.values(dayStatus)[0] === "active")
+      .map((dayStatus) => Object.keys(dayStatus)[0])
+  );
 
   const handleOnSwitchClick = () => {
     const colors = generateRandomColors();
@@ -102,7 +113,7 @@ export default function EditStoreForm({
           }
 
           if (imageRemoved) {
-            formData.append("logoRemoved", "true")
+            formData.append("logoRemoved", "true");
           }
 
           formData.append(
@@ -120,11 +131,20 @@ export default function EditStoreForm({
             })
           );
           formData.append("menu_items", JSON.stringify(menuItems));
+          formData.append("fromTime", convertTo12HourFormat(fromTime));
+          formData.append("toTime", convertTo12HourFormat(toTime));
+          formData.append("days", JSON.stringify({ days: selectedDays }));
+
           formAction(formData);
         }}
         className="w-full flex flex-col space-y-2.5"
       >
-        <input type="hidden" name="defaultLogoId" value={store.default_logos.id} />
+        <input
+          type="hidden"
+          name="defaultLogoId"
+          value={store.default_logos.id}
+        />
+        <input type='hidden' name="storeOperatingTimeId" value={store.store_operating_hours.id} />
         <input type="hidden" name="storeId" value={store.id} />
         <input type="hidden" name="coordinateId" value={store.coordinates.id} />
         <div>
@@ -139,7 +159,6 @@ export default function EditStoreForm({
             </Button>
             <Button
               onClick={() => {
-                handleOnSwitchClick();
                 setLogoState("Default");
               }}
             >
@@ -301,6 +320,68 @@ export default function EditStoreForm({
           <div id="name-error" aria-live="polite" aria-atomic="true">
             {state.errors?.location &&
               state.errors.location.map((error: string, i) => (
+                <p key={i} className="text-sm text-yellow-500">
+                  {error}
+                </p>
+              ))}
+          </div>
+        </div>
+        <div>
+          <label htmlFor="">Operation Time</label>
+          <div className="flex space-x-2.5">
+            <div className="flex flex-col w-full ">
+              <label htmlFor="fromTime" className="text-champagne">
+                From
+              </label>
+              <input
+                onChange={(e) => {
+                  setFromTime(e.target.value);
+                }}
+                value={fromTime}
+                type="time"
+                className="bg-transparent border border-champagne"
+              />
+              <div id="name-error" aria-live="polite" aria-atomic="true">
+                {state.errors?.fromTime &&
+                  state.errors.fromTime.map((error: string, i) => (
+                    <p key={i} className="text-sm text-yellow-500">
+                      {error}
+                    </p>
+                  ))}
+              </div>
+            </div>
+            <div className="flex flex-col w-full">
+              <label htmlFor="toTime" className="text-champagne">
+                To
+              </label>
+              <input
+                onChange={(e) => {
+                  setToTime(e.target.value);
+                }}
+                value={toTime}
+                type="time"
+                className="bg-transparent border border-champagne"
+              />
+              <div id="name-error" aria-live="polite" aria-atomic="true">
+                {state.errors?.toTime &&
+                  state.errors.toTime.map((error: string, i) => (
+                    <p key={i} className="text-sm text-yellow-500">
+                      {error}
+                    </p>
+                  ))}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <label>Operation Days</label>
+          <MultiDayPicker
+            initialSelected={selectedDays}
+            onChange={setSelectedDays}
+          />
+          <div id="name-error" aria-live="polite" aria-atomic="true">
+            {state.errors?.days &&
+              state.errors.days.map((error: string, i) => (
                 <p key={i} className="text-sm text-yellow-500">
                   {error}
                 </p>
