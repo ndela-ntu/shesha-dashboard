@@ -9,7 +9,7 @@ interface DefaultAvatarProps {
 
 export default function DefaultAvatar({
   name,
-  size = 40,
+  size = 50,
   className = "",
   defaultColors,
 }: DefaultAvatarProps) {
@@ -33,7 +33,7 @@ export default function DefaultAvatar({
 
   return (
     <div
-      className={`flex items-center justify-center text-champagne p-2.5 w-8 h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 rounded-full ${className}`}
+      className={`flex items-center justify-center text-champagne p-2.5 w-10 h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 rounded-full ${className}`}
       style={{
         ...gradientStyle,
         fontSize: `${size / 2}px`,
