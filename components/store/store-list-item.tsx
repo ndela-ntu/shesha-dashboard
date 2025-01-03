@@ -9,7 +9,7 @@ export default function StoreListItem({ store }: { store: IStore }) {
   return (
     <li className="w-full my-2 flex flex-row items-center justify-between">
       <div className="flex h-full justify-between items-center space-x-2.5">
-        <div className="aspect-square flex items-center justify-center relative w-8 h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 border border-red-500">
+        <div className="aspect-square flex items-center justify-center relative w-8 h-8 md:w-10 md:h-10 lg:w-12 lg:h-12">
           {store.logoUrl !== null ? (
             <Image
               alt="Store logo"
