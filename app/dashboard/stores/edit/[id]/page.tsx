@@ -42,6 +42,10 @@ export default async function Page({
     return notFound();
   }
 
+  if (regions.length === 0) {
+    return <div>Cannot edit store without regions</div>;
+  }
+
   return (
     <div className="flex flex-col items-center">
       <h1>Edit Store</h1>

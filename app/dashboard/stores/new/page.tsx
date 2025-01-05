@@ -12,6 +12,10 @@ export default async function Page() {
     return <div>{`An error occurred: ${error.message}`}</div>;
   }
 
+  if (regions.length === 0) {
+    return <div>Cannot create store without regions</div>;
+  }
+
   return (
     <div className="flex flex-col items-center">
       <h1>New Store</h1>

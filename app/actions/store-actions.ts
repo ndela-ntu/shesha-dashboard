@@ -1,5 +1,6 @@
 "use server";
 
+import { ITEMSCATEGORY } from "@/models/item_category";
 import IMenu_item from "@/models/menu_item";
 import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
@@ -63,7 +64,7 @@ const StoreSchema = z.object({
         description: z.string(),
         price: z.number(),
         ingredients: z.array(z.string()),
-        category: z.string(),
+        category: z.nativeEnum(ITEMSCATEGORY),
       })
     )
     .nonempty({ message: "Add at least one menu items" }),
@@ -399,29 +400,9 @@ export async function editStore(prevState: State, formData: FormData) {
       throw new Error(`Error creating store: ${storeError.message}`);
     }
 
-    menuItems.forEach(async (menuItem) => {
-      //Check for newness, no update
-      if (menuItem.id.toString().length === 13) {
-        console.log("Inserting new");
-        //Is Date/Is New - insert new
-        const { data: menuItemData, error: menuItemError } = await (
-          await supabase
-        )
-          .from("menu_items")
-          .insert({
-            name: menuItem.name,
-            description: menuItem.description,
-            ingredients: menuItem.ingredients,
-            price: menuItem.price,
-            category: menuItem.category.toUpperCase(),
-            store_ref: store.id,
-          });
+    console.log("Inserting new");
+    await insertMenuItems(menuItems, store.id);
 
-        if (menuItemError) {
-          throw new Error(`Error creating menuItem: ${menuItemError.message}`);
-        }
-      }
-    });
     const dbMenuItems: IMenu_item[] = store.menu_items;
     const menuItemIds = menuItems.map((item) => item.id);
     const filteredDbMenuItems = dbMenuItems.filter(
@@ -430,19 +411,7 @@ export async function editStore(prevState: State, formData: FormData) {
 
     if (filteredDbMenuItems.length > 0) {
       console.log("Deleting old");
-      filteredDbMenuItems.forEach(async (dbItem) => {
-        //Item not available any longer - delete old
-        const { error: deleteMenuItemError } = await (await supabase)
-          .from("menu_items")
-          .delete()
-          .eq("id", dbItem.id);
-
-        if (deleteMenuItemError) {
-          throw new Error(
-            `Error deleting menu item: ${deleteMenuItemError.message}`
-          );
-        }
-      });
+      await deleteMenuItems(filteredDbMenuItems);
     }
   } catch (error) {
     console.error(error);
@@ -452,3 +421,137 @@ export async function editStore(prevState: State, formData: FormData) {
   revalidatePath("/dashboard/stores");
   redirect("/dashboard/stores");
 }
+
+export async function deleteStore(id: number) {
+  try {
+    const { data: store, error: fetchStoreError } = await (await supabase)
+      .from("stores")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (fetchStoreError) {
+      throw new Error(`Failed to fetch store: ${fetchStoreError.message}`);
+    }
+
+    if (store.logoUrl) {
+      const imagePath = store.logoUrl.split("/").pop();
+      const { error: storageError } = await (await supabase).storage
+        .from("shesha-bucket")
+        .remove([`logos/${imagePath}`]);
+
+      if (storageError) {
+        console.error(`Failed to delete image: ${storageError.message}`);
+        // Continue with item deletion even if image deletion fails
+      }
+    }
+
+    const { data: menuItems, error: fetchMenuItemsError } = await (
+      await supabase
+    )
+      .from("menu_items")
+      .select("*")
+      .eq("store_ref", id);
+
+    if (fetchMenuItemsError) {
+      throw new Error(`Failed to fetch region: ${fetchMenuItemsError.message}`);
+    }
+
+    await deleteMenuItems(menuItems);
+
+    const { error: deleteStoreError } = await (await supabase)
+      .from("stores")
+      .delete()
+      .eq("id", id);
+
+    if (deleteStoreError) {
+      throw new Error(`Failed to delete store: ${deleteStoreError.message}`);
+    }
+
+    // const { error: deleteRegionError } = await (await supabase)
+    //   .from("regions")
+    //   .delete()
+    //   .eq("id", store.region_ref);
+
+    // if (deleteRegionError) {
+    //   throw new Error(`Failed to delete region: ${deleteRegionError.message}`);
+    // }
+
+    const { error: deleteCoordError } = await (await supabase)
+      .from("coordinates")
+      .delete()
+      .eq("id", store.location_ref);
+
+    if (deleteCoordError) {
+      throw new Error(
+        `Failed to delete coordinates: ${deleteCoordError.message}`
+      );
+    }
+
+    const { error: deleteDefaultLogoError } = await (await supabase)
+      .from("default_logos")
+      .delete()
+      .eq("id", store.default_logo_ref);
+
+    if (deleteDefaultLogoError) {
+      throw new Error(
+        `Failed to delete default_logo: ${deleteDefaultLogoError.message}`
+      );
+    }
+
+    const { error: deleteOperatingTimeError } = await (await supabase)
+      .from("store_operating_hours")
+      .delete()
+      .eq("id", store.operating_hours_ref);
+
+    if (deleteOperatingTimeError) {
+      throw new Error(
+        `Failed to delete operating hours: ${deleteOperatingTimeError.message}`
+      );
+    }
+  } catch (error) {
+    console.error("Error in deleteStore:", error);
+  }
+
+  revalidatePath("/dashboard/stores");
+}
+
+const insertMenuItems = async (menuItems: IMenu_item[], store_ref: number) => {
+  const promises = menuItems.map(async (menuItem) => {
+    if (menuItem.id.toString().length === 13) {
+      const { data: menuItemData, error: menuItemError } = await (
+        await supabase
+      )
+        .from("menu_items")
+        .insert({
+          name: menuItem.name,
+          description: menuItem.description,
+          ingredients: menuItem.ingredients,
+          price: menuItem.price,
+          category: menuItem.category.toUpperCase(),
+          store_ref,
+        });
+
+      if (menuItemError) {
+        throw new Error(`Error creating menuItem: ${menuItemError.message}`);
+      }
+    }
+  });
+
+  await Promise.all(promises);
+};
+
+const deleteMenuItems = async (menuItems: IMenu_item[]) => {
+  const promises = menuItems.map(async (menuItem) => {
+    const { error: deleteMenuItemError } = await (await supabase)
+      .from("menu_items")
+      .delete()
+      .eq("id", menuItem.id);
+
+    if (deleteMenuItemError) {
+      throw new Error(`Failed to delete store: ${deleteMenuItemError.message}`);
+    }
+  });
+
+  await Promise.all(promises);
+};
