@@ -83,7 +83,7 @@ export default function CreateStoreForm({ regions }: { regions: IRegion[] }) {
   };
 
   return (
-    <div className="pb-6">
+    <div className="pb-6 w-full">
       <form
         action={(formData) => {
           if (imageFile) {

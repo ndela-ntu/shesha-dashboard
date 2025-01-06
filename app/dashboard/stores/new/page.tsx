@@ -17,7 +17,7 @@ export default async function Page() {
   }
 
   return (
-    <div className="flex flex-col items-center">
+    <div className="flex flex-col items-center w-full">
       <h1>New Store</h1>
       <Divider />
       <CreateStoreForm regions={regions} />

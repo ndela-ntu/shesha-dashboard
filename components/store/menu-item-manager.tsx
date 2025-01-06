@@ -233,15 +233,18 @@ export default function MenuItemManager({
         ) : (
           <div className="space-y-4">
             {menuItems.map((item) => (
-              <div key={item.id} className="flex flex-row space-x-2.5">
-                <div className="w-16 h-16 md:w-32 md:h-32 lg:w-64 lg:h-64">
+              <div
+                key={item.id}
+                className="flex flex-row items-start space-x-2.5"
+              >
+                <div className="aspect-square w-28 md:w-48 lg:w-64">
                   <img
                     src={item.image_url}
-                    alt="Preview"
-                    className="w-full h-full object-cover"
+                    alt="Image of food item"
+                    className={`w-full h-full object-cover object-center`}
                   />
                 </div>
-                <div className="border p-4 rounded-lg flex justify-between items-start w-full">
+                <div className="border p-4 rounded-lg flex flex-col justify-between w-full">
                   <div>
                     <h4 className="font-bold text-xl">{item.name}</h4>
                     <p className="text-champagne mb-2">{item.category}</p>
@@ -263,7 +266,7 @@ export default function MenuItemManager({
                   <button
                     type="button"
                     onClick={() => removeMenuItem(item.id)}
-                    className="text-red-500 hover:text-red-700"
+                    className="text-red-500 hover:text-red-700 self-end"
                   >
                     <Trash2 size={24} />
                   </button>
