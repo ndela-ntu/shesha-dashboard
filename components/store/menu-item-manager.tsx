@@ -5,6 +5,7 @@ import IMenu_item from "@/models/menu_item";
 import Button from "../button";
 import React, { useEffect, useState } from "react";
 import { PlusCircle, Trash2 } from "lucide-react";
+import { ImageUpload } from "../image-upload";
 
 export default function MenuItemManager({
   onItemsChangeCB,
@@ -13,13 +14,16 @@ export default function MenuItemManager({
   onItemsChangeCB: (menuItems: IMenu_item[]) => void;
   initMenuItems?: IMenu_item[];
 }) {
-  const [menuItems, setMenuItems] = useState<IMenu_item[]>(initMenuItems ? initMenuItems : []);
+  const [menuItems, setMenuItems] = useState<IMenu_item[]>(
+    initMenuItems ? initMenuItems : []
+  );
   const [newItem, setNewItem] = useState<Omit<IMenu_item, "id">>({
     name: "",
     description: "",
     price: 0,
     ingredients: [],
     category: ITEMSCATEGORY.KOTA,
+    image_url: "",
   });
   const [ingredientInput, setIngredientInput] = useState<string>("");
 
@@ -87,12 +91,17 @@ export default function MenuItemManager({
       price: 0,
       ingredients: [],
       category: ITEMSCATEGORY.KOTA,
+      image_url: "",
     });
     setIngredientInput("");
   };
 
   const removeMenuItem = (idToRemove: number) => {
     setMenuItems((prev) => prev.filter((item) => item.id !== idToRemove));
+  };
+
+  const handleImageChange = (stringImage: string) => {
+    setNewItem((prev) => ({ ...prev, image_url: stringImage }));
   };
 
   useEffect(() => {
@@ -102,6 +111,13 @@ export default function MenuItemManager({
   return (
     <div className="">
       <div className="flex flex-col space-y-2">
+        <div className="flex flex-col">
+          <label>Item Image</label>
+          <ImageUpload
+            clearImage={newItem.image_url === ""}
+            onImageStringUpload={handleImageChange}
+          />
+        </div>
         <div className="grid grid-cols-2 gap-x-2">
           <label>Name</label>
           <label>Category</label>
@@ -139,7 +155,7 @@ export default function MenuItemManager({
         </div>
 
         <div className="flex items-center space-x-2.5">
-          <div>
+          <div className="flex flex-col">
             <label>Price</label>
             <input
               type="number"
@@ -210,42 +226,48 @@ export default function MenuItemManager({
       </div>
 
       {/* Menu Items List */}
-      <div className="py-2.5">
+      <div className="py-2.5 w-full">
         <h3 className="underline">Current Menu Items</h3>
         {menuItems.length === 0 ? (
           <p className="text-champagne">No menu items added yet</p>
         ) : (
           <div className="space-y-4">
             {menuItems.map((item) => (
-              <div
-                key={item.id}
-                className="border p-4 rounded-lg flex justify-between items-start"
-              >
-                <div>
-                  <h4 className="font-bold text-xl">{item.name}</h4>
-                  <p className="text-champagne mb-2">{item.category}</p>
-                  <p className="mb-2">{item.description}</p>
-                  <p className="font-semibold">
-                    Price: R{item.price.toFixed(2)}
-                  </p>
-                  <div className="mt-2">
-                    <strong>Ingredients:</strong>
-                    <ul className="list-disc list-inside">
-                      {item.ingredients.map((ingredient) => (
-                        <li key={ingredient} className="text-sm">
-                          {ingredient}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+              <div key={item.id} className="flex flex-row space-x-2.5">
+                <div className="w-16 h-16 md:w-32 md:h-32 lg:w-64 lg:h-64">
+                  <img
+                    src={item.image_url}
+                    alt="Preview"
+                    className="w-full h-full object-cover"
+                  />
                 </div>
-                <button
-                  type="button"
-                  onClick={() => removeMenuItem(item.id)}
-                  className="text-red-500 hover:text-red-700"
-                >
-                  <Trash2 size={24} />
-                </button>
+                <div className="border p-4 rounded-lg flex justify-between items-start w-full">
+                  <div>
+                    <h4 className="font-bold text-xl">{item.name}</h4>
+                    <p className="text-champagne mb-2">{item.category}</p>
+                    <p className="mb-2">{item.description}</p>
+                    <p className="font-semibold">
+                      Price: R{item.price.toFixed(2)}
+                    </p>
+                    <div className="mt-2">
+                      <strong>Ingredients:</strong>
+                      <ul className="list-disc list-inside">
+                        {item.ingredients.map((ingredient) => (
+                          <li key={ingredient} className="text-sm">
+                            {ingredient}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => removeMenuItem(item.id)}
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    <Trash2 size={24} />
+                  </button>
+                </div>
               </div>
             ))}
           </div>

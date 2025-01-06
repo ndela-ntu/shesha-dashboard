@@ -7,4 +7,5 @@ export default interface IMenu_item {
   price: number;
   ingredients: string[];
   category: ITEMSCATEGORY;
+  image_url: string;
 }

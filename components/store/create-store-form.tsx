@@ -150,7 +150,7 @@ export default function CreateStoreForm({ regions }: { regions: IRegion[] }) {
               </div>
             </div>
           ) : (
-            <ImageUpload onImageUpload={setImageFile} />
+            <ImageUpload onImageFileUpload={setImageFile} />
           )}
           <div id="name-error" aria-live="polite" aria-atomic="true">
             {state.errors?.defaultLogo &&

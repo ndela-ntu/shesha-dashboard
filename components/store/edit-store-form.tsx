@@ -185,7 +185,7 @@ export default function EditStoreForm({
           ) : (
             <ImageUpload
               initImageUrl={store.logoUrl}
-              onImageUpload={setImageFile}
+              onImageFileUpload={setImageFile}
               imageRemoved={setImageRemoved}
             />
           )}

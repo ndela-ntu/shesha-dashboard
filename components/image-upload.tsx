@@ -1,17 +1,27 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Upload, X } from "lucide-react";
 import Button from "./button";
 
 interface ImageUploadProps {
-  onImageUpload: (file: File | null) => void;
+  onImageStringUpload?: (image: string) => void;
+  onImageFileUpload?: (file: File | null) => void;
   initImageUrl?: string;
   imageRemoved?: (value: boolean) => void;
+  clearImage?: boolean;
 }
 
-export function ImageUpload({ onImageUpload, initImageUrl, imageRemoved }: ImageUploadProps) {
-  const [initImageUrlState, setInitImageUrlState] = useState<string | undefined> (initImageUrl);
+export function ImageUpload({
+  onImageFileUpload,
+  onImageStringUpload,
+  initImageUrl,
+  imageRemoved,
+  clearImage,
+}: ImageUploadProps) {
+  const [initImageUrlState, setInitImageUrlState] = useState<
+    string | undefined
+  >(initImageUrl);
   const [preview, setPreview] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -29,7 +39,10 @@ export function ImageUpload({ onImageUpload, initImageUrl, imageRemoved }: Image
           setPreview(reader.result as string);
         };
         reader.readAsDataURL(file);
-        onImageUpload(file);
+        if (onImageFileUpload) {
+          onImageFileUpload(file);
+        }
+
         setError(null);
       } else {
         setError("Please select an image file.");
@@ -44,13 +57,32 @@ export function ImageUpload({ onImageUpload, initImageUrl, imageRemoved }: Image
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
-      onImageUpload(null);
-    }else if (initImageUrl) {
+      if (onImageFileUpload) {
+        onImageFileUpload(null);
+      }
+    } else if (initImageUrl) {
       imageRemoved!(true);
       setInitImageUrlState(undefined);
-      onImageUpload(null);
+      if (onImageFileUpload) {
+        onImageFileUpload(null);
+      }
     }
   };
+
+  useEffect(() => {
+    if (clearImage) {
+      setPreview(null);
+      if (onImageStringUpload) {
+        onImageStringUpload("");
+      }
+    }
+  }, [clearImage]);
+
+  useEffect(() => {
+    if (onImageStringUpload && preview) {
+      onImageStringUpload(preview);
+    }
+  }, [preview]);
 
   return (
     <div className="mt-4 flex flex-col items-center space-y-4">

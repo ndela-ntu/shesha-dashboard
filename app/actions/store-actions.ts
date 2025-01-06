@@ -65,6 +65,7 @@ const StoreSchema = z.object({
         price: z.number(),
         ingredients: z.array(z.string()),
         category: z.nativeEnum(ITEMSCATEGORY),
+        image_url: z.string(),
       })
     )
     .nonempty({ message: "Add at least one menu items" }),
