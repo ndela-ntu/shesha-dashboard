@@ -1,17 +1,22 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    eslint: {
-        ignoreDuringBuilds: true,
+  experimental: {
+    serverActions: {
+      bodySizeLimit: "3mb",
     },
-    images: {
-        remotePatterns: [
-          {
-            protocol: "https",
-            hostname: "qoubgqnkwmjdfuvcvqbk.supabase.co",
-            port: "",
-          },
-        ],
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "qoubgqnkwmjdfuvcvqbk.supabase.co",
+        port: "",
       },
+    ],
+  },
 };
 
 module.exports = nextConfig;

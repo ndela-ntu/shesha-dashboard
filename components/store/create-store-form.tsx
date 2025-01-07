@@ -359,6 +359,11 @@ export default function CreateStoreForm({ regions }: { regions: IRegion[] }) {
               ))}
           </div>
         </div>
+        <div id="name-error" aria-live="polite" aria-atomic="true">
+          {state.message && (
+            <p className="text-sm text-yellow-500">{state.message}</p>
+          )}
+        </div>
         <SubmitButton className="fixed bottom-4 right-4">Save</SubmitButton>
       </form>
       <dialog id="location_error" className="modal">

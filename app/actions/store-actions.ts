@@ -2,6 +2,7 @@
 
 import { ITEMSCATEGORY } from "@/models/item_category";
 import IMenu_item from "@/models/menu_item";
+import convertStringToFile from "@/utils/convert-string-to-image";
 import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -213,27 +214,10 @@ export async function createStore(prevState: State, formData: FormData) {
       throw new Error(`Error creating store: ${storeError}`);
     }
 
-    menuItems.forEach(async (menuItem) => {
-      const { data: menuItemData, error: menuItemError } = await (
-        await supabase
-      )
-        .from("menu_items")
-        .insert({
-          name: menuItem.name,
-          description: menuItem.description,
-          price: menuItem.price,
-          ingredients: menuItem.ingredients,
-          category: menuItem.category.toUpperCase(),
-          store_ref: store.id,
-        });
-
-      if (menuItemError) {
-        throw new Error(`Error creating menuItem: ${menuItemError}`);
-      }
-    });
+    insertMenuItems(menuItems, store.id);
   } catch (error) {
-    console.error(error);
-    return { message: "Failed to save store. Please try again." };
+    console.log(error);
+    return { message: `Failed to save store. ${error}` };
   }
 
   revalidatePath("/dashboard/stores");
@@ -402,7 +386,7 @@ export async function editStore(prevState: State, formData: FormData) {
     }
 
     console.log("Inserting new");
-    await insertMenuItems(menuItems, store.id);
+    await insertMenuItemsWithId(menuItems, store.id);
 
     const dbMenuItems: IMenu_item[] = store.menu_items;
     const menuItemIds = menuItems.map((item) => item.id);
@@ -416,7 +400,7 @@ export async function editStore(prevState: State, formData: FormData) {
     }
   } catch (error) {
     console.error(error);
-    return { message: "Failed to save store. Please try again." };
+    return { message: `Failed to save store. ${error}` };
   }
 
   revalidatePath("/dashboard/stores");
@@ -469,15 +453,6 @@ export async function deleteStore(id: number) {
       throw new Error(`Failed to delete store: ${deleteStoreError.message}`);
     }
 
-    // const { error: deleteRegionError } = await (await supabase)
-    //   .from("regions")
-    //   .delete()
-    //   .eq("id", store.region_ref);
-
-    // if (deleteRegionError) {
-    //   throw new Error(`Failed to delete region: ${deleteRegionError.message}`);
-    // }
-
     const { error: deleteCoordError } = await (await supabase)
       .from("coordinates")
       .delete()
@@ -511,13 +486,61 @@ export async function deleteStore(id: number) {
       );
     }
   } catch (error) {
-    console.error("Error in deleteStore:", error);
+    console.error(error);
   }
 
   revalidatePath("/dashboard/stores");
 }
 
 const insertMenuItems = async (menuItems: IMenu_item[], store_ref: number) => {
+  const promises = menuItems.map(async (menuItem) => {
+    const image = convertStringToFile(menuItem.image_url, "food_image");
+    let image_url: string | null = null;
+
+    if (image.size < 1 * 1024 * 1024) {
+      const { data: imageData, error: imageError } = await (
+        await supabase
+      ).storage
+        .from("shesha-bucket")
+        .upload(`food/${Date.now()}-${image.name}`, image);
+
+      if (imageError) {
+        throw new Error(`Failed to upload image: ${imageError.message}`);
+      }
+
+      const {
+        data: { publicUrl },
+      } = (await supabase).storage
+        .from("shesha-bucket")
+        .getPublicUrl(imageData.path);
+
+      image_url = publicUrl;
+    } else throw new Error(`Food image for ${menuItem.name} too large`);
+
+    const { error: menuItemError } = await (await supabase)
+      .from("menu_items")
+      .insert({
+        name: menuItem.name,
+        description: menuItem.description,
+        price: menuItem.price,
+        ingredients: menuItem.ingredients,
+        category: menuItem.category.toUpperCase(),
+        store_ref,
+        image_url,
+      });
+
+    if (menuItemError) {
+      throw new Error(`Error creating menuItem: ${menuItemError}`);
+    }
+  });
+
+  await Promise.all(promises);
+};
+
+const insertMenuItemsWithId = async (
+  menuItems: IMenu_item[],
+  store_ref: number
+) => {
   const promises = menuItems.map(async (menuItem) => {
     if (menuItem.id.toString().length === 13) {
       const { data: menuItemData, error: menuItemError } = await (

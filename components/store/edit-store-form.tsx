@@ -144,7 +144,11 @@ export default function EditStoreForm({
           name="defaultLogoId"
           value={store.default_logos.id}
         />
-        <input type='hidden' name="storeOperatingTimeId" value={store.store_operating_hours.id} />
+        <input
+          type="hidden"
+          name="storeOperatingTimeId"
+          value={store.store_operating_hours.id}
+        />
         <input type="hidden" name="storeId" value={store.id} />
         <input type="hidden" name="coordinateId" value={store.coordinates.id} />
         <div>
@@ -403,6 +407,11 @@ export default function EditStoreForm({
                 </p>
               ))}
           </div>
+        </div>
+        <div id="name-error" aria-live="polite" aria-atomic="true">
+          {state.message && (
+            <p className="text-sm text-yellow-500">{state.message}</p>
+          )}
         </div>
         <SubmitButton className="fixed bottom-4 right-4">Save</SubmitButton>
       </form>
