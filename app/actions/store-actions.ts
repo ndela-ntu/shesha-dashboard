@@ -244,7 +244,7 @@ export async function editStore(prevState: State, formData: FormData) {
   if (!result.success) {
     return {
       errors: result.error.flatten().fieldErrors,
-      message: "Missing fields. Failed to create store",
+      message: "Missing fields. Failed to edit store",
     };
   }
 
