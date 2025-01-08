@@ -543,6 +543,29 @@ const insertMenuItemsWithId = async (
 ) => {
   const promises = menuItems.map(async (menuItem) => {
     if (menuItem.id.toString().length === 13) {
+      const image = convertStringToFile(menuItem.image_url, "food_image");
+      let image_url: string | null = null;
+      console.log(image);
+      if (image.size < 1 * 1024 * 1024) {
+        const { data: imageData, error: imageError } = await (
+          await supabase
+        ).storage
+          .from("shesha-bucket")
+          .upload(`food/${Date.now()}-${image.name}`, image);
+
+        if (imageError) {
+          throw new Error(`Failed to upload image: ${imageError.message}`);
+        }
+
+        const {
+          data: { publicUrl },
+        } = (await supabase).storage
+          .from("shesha-bucket")
+          .getPublicUrl(imageData.path);
+
+        image_url = publicUrl;
+      } else throw new Error(`Food image for ${menuItem.name} too large`);
+
       const { data: menuItemData, error: menuItemError } = await (
         await supabase
       )
@@ -554,6 +577,7 @@ const insertMenuItemsWithId = async (
           price: menuItem.price,
           category: menuItem.category.toUpperCase(),
           store_ref,
+          image_url,
         });
 
       if (menuItemError) {
@@ -567,6 +591,18 @@ const insertMenuItemsWithId = async (
 
 const deleteMenuItems = async (menuItems: IMenu_item[]) => {
   const promises = menuItems.map(async (menuItem) => {
+    if (menuItem.image_url) {
+      const imagePath = menuItem.image_url.split("/").pop();
+      const { error: storageError } = await (await supabase).storage
+        .from("shesha-bucket")
+        .remove([`food/${imagePath}`]);
+
+      if (storageError) {
+        console.error(`Failed to delete image: ${storageError.message}`);
+        // Continue with item deletion even if image deletion fails
+      }
+    }
+
     const { error: deleteMenuItemError } = await (await supabase)
       .from("menu_items")
       .delete()
